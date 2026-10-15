@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/Duskland.Api/Duskland.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Products/">
+    <Project Path="src/Modules/Products/Duskland.Modules.Products.Contracts/Duskland.Modules.Products.Contracts.csproj" />
+    <Project Path="src/Modules/Products/Duskland.Modules.Products/Duskland.Modules.Products.csproj" />
+  </Folder>
+</Solution>
