@@ -14,7 +14,7 @@ public class GlobalExceptionHandler(IProblemDetailsService ProblemDetailsService
     {
         var statusCode = StatusCodes.Status500InternalServerError;
         var title = "Server Error";
-        var detail = exception.Message;
+        var detail = "Internal Server Error";
 
         if (exception is ConflictException conflictException)
         {

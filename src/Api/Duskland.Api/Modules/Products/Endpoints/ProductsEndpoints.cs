@@ -1,6 +1,5 @@
 using Duskland.Api.Modules.Products.Requests;
 using Duskland.Modules.Products.Features.CreateProduct;
-using Duskland.Modules.Products.Infrastructure.DAL.Context;
 
 namespace Duskland.Api.Modules.Products.Endpoints;
 
@@ -17,15 +16,23 @@ public static class ProductsEndpoints
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status409Conflict); 
 
+        group.MapGet("/{productId}/", GetFakeProduct)
+             .WithName("GetProduct")
+             .Produces<int>(StatusCodes.Status200OK);
+
         return app;
     }
 
-    private static async Task<IResult> CreateProduct(Guid storeId, CreateProductRequest request, ProductDbContext context, CancellationToken cancellationToken)
+    private static async Task<IResult> CreateProduct(Guid storeId, CreateProductRequest request, ICreateProductHandler handler, CancellationToken cancellationToken)
     {
         var command = new CreateProductCommand(storeId, request.SKU, request.Name, request.Price);
-        await new CreateProductHandler(context).Handle(command, cancellationToken);
+        var productId = await handler.Handle(command, cancellationToken);
 
-        //TO DO: CreatedAt when get endpoint is added
-        return Results.Created();
+        return Results.CreatedAtRoute("GetProduct", new { storeId, productId });
+    }
+
+    private static string GetFakeProduct(Guid storeId, Guid productId)
+    {
+        return $"Fake product {productId} for store {storeId}";
     }
 }
