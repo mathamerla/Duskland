@@ -1,6 +1,7 @@
-using System;
 using Duskland.Modules.Products.Domain;
+using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Duskland.Modules.Products.Infrastructure.DAL.Context;
 
@@ -28,8 +29,8 @@ internal class ProductDbContext: DbContext
                 .HasMaxLength(200);
 
             entity.HasIndex(e => new { e.StoreId, e.SKU })
+                .HasDatabaseName("IX_Products_StoreId_SKU")
                 .IsUnique();
         });
     }
-
 }
