@@ -1,16 +1,11 @@
+using Duskland.Modules.Products.Contracts.Features.CreateProduct;
+using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
 using Duskland.Modules.Products.Domain;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
 using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
 using EntityFramework.Exceptions.Common;
 
 namespace Duskland.Modules.Products.Features.CreateProduct;
-
-public record CreateProductCommand(Guid StoreId, string SKU, string Name, decimal Price);
-
-public interface ICreateProductHandler
-{
-    Task<Guid> Handle(CreateProductCommand command, CancellationToken cancellationToken);
-}
 
 internal class CreateProductHandler(ProductDbContext Context): ICreateProductHandler
 {

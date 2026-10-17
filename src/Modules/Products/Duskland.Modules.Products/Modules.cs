@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using EntityFramework.Exceptions.PostgreSQL;
 using Duskland.Modules.Products.Features.CreateProduct;
+using Duskland.Modules.Products.Contracts.Features.CreateProduct;
 
 namespace Duskland.Modules.Products;
 

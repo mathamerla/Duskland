@@ -1,5 +1,6 @@
 using Duskland.Api.Modules.Products.Requests;
-using Duskland.Modules.Products.Features.CreateProduct;
+using Duskland.Modules.Products.Contracts.Features.CreateProduct;
+using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
 
 namespace Duskland.Api.Modules.Products.Endpoints;
 
