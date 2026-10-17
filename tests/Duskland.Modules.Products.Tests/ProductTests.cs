@@ -58,7 +58,7 @@ public class ProductTests
         var exception = Assert.Throws<DomainException>(() 
             => Product.Create(_storeId, "aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789aBcDeFgHiJkLmNo", _name, _price));
 
-        Assert.Equal("Prodcut SKU need to be between 1 and 200 characters", exception.Message);
+        Assert.Equal("Product SKU need to be between 1 and 50 characters", exception.Message);
     }
 
     [Fact]
