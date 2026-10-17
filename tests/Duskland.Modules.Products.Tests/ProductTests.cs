@@ -13,47 +13,58 @@ public class ProductTests
     [Fact]
     public void Product_ValidData_ProductCreated()
     {
-        var product = Product.CreateProduct(_storeId, _sku, _name, _price);
+        var product = Product.Create(_storeId, _sku, _name, _price);
     
         Assert.NotNull(product);
+        Assert.NotEqual(default, product.Id);
         Assert.Equal(_storeId, product.StoreId);
         Assert.Equal(_name, product.Name);
         Assert.Equal(_sku, product.SKU);
         Assert.Equal(_price, product.Price);
+        Assert.True(product.IsActive);
     }
 
     [Fact]
     public void Product_NegativePrice_Exception()
     {
-        Assert.Throws<DomainException>(() 
-            => Product.CreateProduct(_storeId, _sku, _name, -11.11m));
+        var exception = Assert.Throws<DomainException>(() 
+            => Product.Create(_storeId, _sku, _name, -11.11m));
+
+        Assert.Equal("Product price can't be below zero", exception.Message);
     }
 
     [Fact]
     public void Product_EmptyStoreID_Exception()
     {
-        Assert.Throws<DomainException>(() 
-            => Product.CreateProduct(default, _sku, _name, _price));
+        var exception = Assert.Throws<DomainException>(() 
+            => Product.Create(default, _sku, _name, _price));
+
+        Assert.Equal("Incorrect StoreId for Product", exception.Message);
+        
     }
 
     [Fact]
     public void Product_TooShortName_Exception()
     {
-        Assert.Throws<DomainException>(() 
-            => Product.CreateProduct(default, _sku, "aa", _price));
+        var exception = Assert.Throws<DomainException>(() 
+            => Product.Create(_storeId, _sku, "aa", _price));
+
+        Assert.Equal("Prodcut name need to be between 3 and 200 characters", exception.Message);
     }
 
     [Fact]
     public void Product_TooLongSKU_Exception()
     {
-        Assert.Throws<DomainException>(() 
-            => Product.CreateProduct(default, "aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789aBcDeFgHiJkLmNo", _name, _price));
+        var exception = Assert.Throws<DomainException>(() 
+            => Product.Create(_storeId, "aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789aBcDeFgHiJkLmNo", _name, _price));
+
+        Assert.Equal("Prodcut SKU need to be between 1 and 200 characters", exception.Message);
     }
 
     [Fact]
     public void Product_NewProduct_IsActive()
     {
-        var product = Product.CreateProduct(_storeId, _sku, _name, _price);
+        var product = Product.Create(_storeId, _sku, _name, _price);
 
         Assert.True(product.IsActive);
     }
@@ -61,7 +72,7 @@ public class ProductTests
     [Fact]
     public void Product_ChangePrice_PriceChanged()
     {
-        var product = Product.CreateProduct(_storeId, _sku, _name, _price);
+        var product = Product.Create(_storeId, _sku, _name, _price);
 
         product.ChangePrice(155.1m);
 
@@ -72,9 +83,11 @@ public class ProductTests
     [Fact]
     public void Product_ChangePrice_Exception()
     {
-        var product = Product.CreateProduct(_storeId, _sku, _name, _price);
+        var product = Product.Create(_storeId, _sku, _name, _price);
 
-        Assert.Throws<DomainException>(() 
-            => product.ChangePrice(-11.32m));    
+        var exception = Assert.Throws<DomainException>(() 
+            => product.ChangePrice(-11.32m)); 
+
+        Assert.Equal("Product price can't be below zero", exception.Message);
     }
 }

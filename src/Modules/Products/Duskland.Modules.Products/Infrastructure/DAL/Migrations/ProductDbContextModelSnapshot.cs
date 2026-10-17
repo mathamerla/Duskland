@@ -17,6 +17,7 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("product")
                 .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -52,7 +53,10 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.HasIndex("StoreId", "SKU")
+                        .IsUnique();
+
+                    b.ToTable("Products", "product");
                 });
 #pragma warning restore 612, 618
         }

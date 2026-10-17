@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
 {
     [DbContext(typeof(ProductDbContext))]
-    [Migration("20261016160904_ProductEntity")]
+    [Migration("20261017035101_ProductEntity")]
     partial class ProductEntity
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("product")
                 .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -55,7 +56,10 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.HasIndex("StoreId", "SKU")
+                        .IsUnique();
+
+                    b.ToTable("Products", "product");
                 });
 #pragma warning restore 612, 618
         }

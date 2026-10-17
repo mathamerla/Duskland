@@ -11,8 +11,12 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "product");
+
             migrationBuilder.CreateTable(
                 name: "Products",
+                schema: "product",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -27,13 +31,21 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_StoreId_SKU",
+                schema: "product",
+                table: "Products",
+                columns: new[] { "StoreId", "SKU" },
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "Products",
+                schema: "product");
         }
     }
 }
