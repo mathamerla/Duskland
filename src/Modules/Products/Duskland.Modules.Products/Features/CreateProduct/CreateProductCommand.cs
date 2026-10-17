@@ -32,7 +32,7 @@ internal class CreateProductHandler(ProductDbContext Context): ICreateProductHan
         }
         catch (UniqueConstraintException ex)
         {
-            if (ex.InnerException is not null && ex.InnerException.Message.Contains("IX_Products_StoreId_SKU"))
+            if (ex.ConstraintName == "IX_Products_StoreId_SKU")
             {                
                 throw new ConflictException($"SKU {product.SKU} is not unique for specified store", ex);
             }
