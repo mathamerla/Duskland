@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\..\Modules\Products\Duskland.Modules.Products.Contracts\Duskland.Modules.Products.Contracts.csproj" />
@@ -15,6 +15,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>9cf932f7-51a7-4831-a8f9-a1611a77287f</UserSecretsId>
   </PropertyGroup>
 
 </Project>
