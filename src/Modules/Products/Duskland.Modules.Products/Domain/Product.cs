@@ -11,7 +11,7 @@ public class Product
         SKU = string.Empty;
     }
 
-    public static Product CreateProduct(Guid storeId, string sku, string name, decimal price)
+    public static Product Create(Guid storeId, string sku, string name, decimal price)
     {
         var product = new Product()
         {
@@ -36,14 +36,14 @@ public class Product
     public bool IsActive { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public void ChangeStoreId(Guid storeId)
+    public void ChangePrice(decimal price)
     {
-        if (storeId == default)
+        if (price < 0m)
         {
-            throw new DomainException("Incorrect StoreId for Product");    
+            throw new DomainException("Product price can't be below zero");    
         }
 
-        StoreId = storeId;
+        Price = price; 
     }
 
     public void ChangeName(string name)
@@ -55,13 +55,23 @@ public class Product
 
         if (name.Length > 200 || name.Length < 3)
         {
-            throw new DomainException("Prodcut name need to be between 2 and 200 characters");    
+            throw new DomainException("Prodcut name need to be between 3 and 200 characters");    
         }
 
         Name = name;
     }
 
-    public void ChangeSKU(string sku)
+    private void ChangeStoreId(Guid storeId)
+    {
+        if (storeId == default)
+        {
+            throw new DomainException("Incorrect StoreId for Product");    
+        }
+
+        StoreId = storeId;
+    }
+
+    private void ChangeSKU(string sku)
     {
         if (string.IsNullOrWhiteSpace(sku))
         {
@@ -70,19 +80,9 @@ public class Product
 
         if (sku.Length > 50 || sku.Length < 1)
         {
-            throw new DomainException("Prodcut SKU need to be between 2 and 200 characters");    
+            throw new DomainException("Prodcut SKU need to be between 1 and 200 characters");    
         }
 
         SKU = sku;
-    }
-
-    public void ChangePrice(decimal price)
-    {
-        if (price < 0m)
-        {
-            throw new DomainException("Product price can't be below zero");    
-        }
-
-        Price = price; 
     }
 }

@@ -4,8 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Duskland.Modules.Products.Infrastructure.DAL.Context;
 
-public class ProductDbContext: DbContext
+internal class ProductDbContext: DbContext
 {
+    public const string SCHEMA = "product";
+
     public ProductDbContext(DbContextOptions<ProductDbContext> options): base(options)
     {
         
@@ -15,6 +17,8 @@ public class ProductDbContext: DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema(SCHEMA);
+
         modelBuilder.Entity<Product>(entity =>
         {
              entity.Property(e => e.SKU)
@@ -22,6 +26,9 @@ public class ProductDbContext: DbContext
 
              entity.Property(e => e.Name)
                 .HasMaxLength(200);
+
+            entity.HasIndex(e => new { e.StoreId, e.SKU })
+                .IsUnique();
         });
     }
 
