@@ -80,7 +80,7 @@ public class Product
 
         if (sku.Length > 50 || sku.Length < 1)
         {
-            throw new DomainException("Prodcut SKU need to be between 1 and 200 characters");    
+            throw new DomainException("Prodcut SKU need to be between 1 and 50 characters");    
         }
 
         SKU = sku;
