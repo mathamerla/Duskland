@@ -14,7 +14,6 @@ ProductModules.RegisterModules(builder.Services, connectionString);
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddOpenApi(); 
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -27,5 +26,3 @@ app.MapOpenApi();
 app.MapScalarApiReference(); 
 
 app.Run();
-
-public partial class Product {}

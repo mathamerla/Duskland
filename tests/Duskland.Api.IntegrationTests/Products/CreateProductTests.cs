@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using Duskland.Api.IntegrationTests.Infrastructure;
 using Duskland.Api.Modules.Products.Requests;
-using Renci.SshNet.Sftp;
 
 namespace Duskland.Api.IntegrationTests.Products;
 

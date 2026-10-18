@@ -31,5 +31,7 @@ public class DusklandWebApplicationFactory : WebApplicationFactory<Program>, IAs
     {
         await Container.StopAsync();
         await Container.DisposeAsync();
+
+        await base.DisposeAsync();
     }
 }
