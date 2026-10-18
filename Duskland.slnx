@@ -9,6 +9,7 @@
     <Project Path="src/Modules/Products/Duskland.Modules.Products/Duskland.Modules.Products.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Duskland.Api.IntegrationTests/Duskland.Api.IntegrationTests.csproj" />
     <Project Path="tests/Duskland.Modules.Products.Tests/Duskland.Modules.Products.Tests.csproj" />
   </Folder>
 </Solution>
