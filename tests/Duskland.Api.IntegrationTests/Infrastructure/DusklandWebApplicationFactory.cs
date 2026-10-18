@@ -34,4 +34,12 @@ public class DusklandWebApplicationFactory : WebApplicationFactory<Program>, IAs
 
         await base.DisposeAsync();
     }
+
+    public void ClearTable<T>() where T: class
+    {
+        using var scope = Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+
+        context.Set<T>().ExecuteDelete();
+    }
 }

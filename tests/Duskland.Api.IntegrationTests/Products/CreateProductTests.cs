@@ -1,18 +1,19 @@
 using System.Net.Http.Json;
 using Duskland.Api.IntegrationTests.Infrastructure;
 using Duskland.Api.Modules.Products.Requests;
+using Duskland.Modules.Products.Domain;
 
 namespace Duskland.Api.IntegrationTests.Products;
 
 public class CreateProductTests: IClassFixture<DusklandWebApplicationFactory>
 {
     private readonly HttpClient _httpClient;
-    private readonly DusklandWebApplicationFactory _factory;
 
     public CreateProductTests(DusklandWebApplicationFactory factory)
     {
-        _factory = factory;
-        _httpClient = _factory.CreateClient();
+        _httpClient = factory.CreateClient();
+
+        factory.ClearTable<Product>();
     }
 
     [Fact]
