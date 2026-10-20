@@ -42,4 +42,12 @@ public class DusklandWebApplicationFactory : WebApplicationFactory<Program>, IAs
 
         context.Set<T>().ExecuteDelete();
     }
+
+    public async Task<IReadOnlyList<T>> GetTable<T>() where T: class
+    {
+        using var scope = Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+
+        return await context.Set<T>().ToListAsync();
+    }
 }
