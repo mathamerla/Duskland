@@ -79,7 +79,12 @@ public class CreateProductTests: IClassFixture<DusklandWebApplicationFactory>
     {
         var response = await _httpClient.PostAsJsonAsync("/api/stores/7b2a9d8c-4f1e-45b6-bd4e-e17f3a8b2c5d/products", 
             new CreateProductRequest("adas", "adsa", -10.0m));
+
+        var products = await _factory.GetTable<Product>();
+
+        var product = products.FirstOrDefault(c => c.Name == "adsa");
         
+        Assert.Null(product);
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
     }
 
@@ -94,6 +99,9 @@ public class CreateProductTests: IClassFixture<DusklandWebApplicationFactory>
 
         var responses = await Task.WhenAll([requestA, requestB]);
 
+        var products = await _factory.GetTable<Product>();
+
+        Assert.Equal(1, products.Count());
         Assert.Single(responses, c => c.StatusCode == System.Net.HttpStatusCode.Created);
         Assert.Single(responses, c => c.StatusCode == System.Net.HttpStatusCode.Conflict);
     }
