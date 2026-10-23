@@ -1,6 +1,9 @@
 using Duskland.Api.Modules.Products.Requests;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
+using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
+using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Duskland.Api.Modules.Products.Endpoints;
 
@@ -21,6 +24,11 @@ public static class ProductsEndpoints
              .WithName("GetProduct")
              .Produces<int>(StatusCodes.Status200OK);
 
+        group.MapGet("/", GetProducts)
+             .WithName("GetProducts")
+             .Produces<PagedList<ProductDto>>(StatusCodes.Status200OK)
+             .ProducesProblem(StatusCodes.Status400BadRequest);
+
         return app;
     }
 
@@ -30,6 +38,14 @@ public static class ProductsEndpoints
         var productId = await handler.Handle(command, cancellationToken);
 
         return Results.CreatedAtRoute("GetProduct", new { storeId, productId });
+    }
+
+    private static async Task<PagedList<ProductDto>> GetProducts(Guid storeId, [AsParameters]PagedQueryParameters parameters, [FromQuery]string? searchBy, IGetProductsHandler handler, CancellationToken token)
+    {
+        var query = new GetProductsQuery(parameters, storeId, searchBy ?? string.Empty);
+        var result = await handler.Handle(query, token);
+
+        return result;
     }
 
     private static string GetFakeProduct(Guid storeId, Guid productId)

@@ -1,3 +1,4 @@
+using Duskland.Modules.Products.Domain;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -49,5 +50,14 @@ public class DusklandWebApplicationFactory : WebApplicationFactory<Program>, IAs
         var context = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
 
         return await context.Set<T>().ToListAsync();
+    }
+
+    public async Task InsertIntoTable<T>(IReadOnlyList<T> items) where T: class
+    {
+        using var scope = Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
+
+        await context.Set<T>().AddRangeAsync(items);
+        await context.SaveChangesAsync();
     }
 }

@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using EntityFramework.Exceptions.PostgreSQL;
 using Duskland.Modules.Products.Features.CreateProduct;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct;
+using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
+using Duskland.Modules.Products.Features.GetProducts;
 
 namespace Duskland.Modules.Products;
 
@@ -18,6 +20,7 @@ public static class ProductModules
         ); 
 
         services.AddScoped<ICreateProductHandler, CreateProductHandler>();
+        services.AddScoped<IGetProductsHandler, GetProductsHandler>();
 
         return services;
     } 

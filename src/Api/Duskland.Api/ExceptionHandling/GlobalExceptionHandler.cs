@@ -1,3 +1,4 @@
+using Duskland.Modules.Products.Contracts.Common;
 using Duskland.Modules.Products.Domain.Common;
 using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
@@ -27,6 +28,12 @@ public class GlobalExceptionHandler(IProblemDetailsService ProblemDetailsService
             statusCode = StatusCodes.Status400BadRequest;
             title = "Domain Exception";
             detail = domainException.Message;            
+        }
+        else if (exception is ContractValidationException contractValidationException)
+        {
+            statusCode = StatusCodes.Status400BadRequest;
+            title = "Contract Validation Exception";
+            detail = contractValidationException.Message;            
         }
         else
         {
