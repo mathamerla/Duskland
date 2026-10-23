@@ -83,6 +83,26 @@ public class GetProductsTests : IClassFixture<DusklandWebApplicationFactory>
         Assert.Equal(expected, result.Items.Select(p => p.SKU));
     }
 
+    [Fact]
+    public async Task GetProducts_NoQueryParams_ReturnsForDefaultParams()
+    {
+        var apple = Product.Create(_storeId, "SKU-C", "Apple", 20m);
+        var banana = Product.Create(_storeId, "SKU-A", "Banana", 30m);
+        var cherry = Product.Create(_storeId, "SKU-B", "Cherry", 10m);
+        
+        await _factory.InsertIntoTable([banana, cherry, apple]);
+        
+        var expected = new List<string> { apple.SKU, banana.SKU, cherry.SKU };
+
+        var response = await _httpClient.GetAsync(_baseUrl(_storeId));
+        var result = await response.Content.ReadFromJsonAsync<PagedList<ProductDto>>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(result);
+        Assert.Equal(3, result.TotalCount);
+        Assert.Equal(expected, result.Items.Select(p => p.SKU));
+    }
+
     [Theory]
     [InlineData(1, 2, 2)]
     [InlineData(2, 2, 1)]
@@ -112,8 +132,8 @@ public class GetProductsTests : IClassFixture<DusklandWebApplicationFactory>
     }
 
     [Theory]
-    [InlineData("aPpLe", 1)]
-    [InlineData("%APPLE%", 2)]
+    [InlineData("aPpLe", 2)]
+    [InlineData("%APPLE%", 0)]
     [InlineData("missing", 0)]
     public async Task GetProducts_Search_ReturnsMatchingNames(string searchBy, int expectedCount)
     {
@@ -174,7 +194,9 @@ public class GetProductsTests : IClassFixture<DusklandWebApplicationFactory>
         return result;
     }
 
+    private string _baseUrl(Guid storeId) => $"/api/stores/{storeId}/products";
+
     private string BuildUrl(int page, int pageSize, string sortBy, Direction direction, string searchBy)
-        => $"/api/stores/{_storeId}/products?Page={page}&PageSize={pageSize}"
+        => $"{_baseUrl(_storeId)}?Page={page}&PageSize={pageSize}"
            + $"&SortBy={Uri.EscapeDataString(sortBy)}&Direction={direction}&SearchBy={Uri.EscapeDataString(searchBy)}";
 }

@@ -26,8 +26,8 @@ public static class ProductsEndpoints
 
         group.MapGet("/", GetProducts)
              .WithName("GetProducts")
-             .Produces<int>(StatusCodes.Status200OK)
-             .Produces<int>(StatusCodes.Status400BadRequest);
+             .Produces<PagedList<ProductDto>>(StatusCodes.Status200OK)
+             .ProducesProblem(StatusCodes.Status400BadRequest);
 
         return app;
     }

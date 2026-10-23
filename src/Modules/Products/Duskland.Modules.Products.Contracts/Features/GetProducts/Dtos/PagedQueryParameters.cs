@@ -8,7 +8,7 @@ public enum Direction
     ASC
 }
 
-public class PagedQueryParameters(int page, int pageSize, Direction direction, string? sortBy)
+public class PagedQueryParameters(int page = 1, int pageSize = 20, Direction direction = Direction.ASC, string? sortBy = "")
 {
     public int Page { get; set; } = page;
     public int PageSize { get; set; } = pageSize;

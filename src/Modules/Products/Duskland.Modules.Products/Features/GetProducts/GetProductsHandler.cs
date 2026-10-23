@@ -1,6 +1,7 @@
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
 using Duskland.Modules.Products.Domain;
+using Duskland.Modules.Products.Extensions;
 using Duskland.Modules.Products.Features.GetProducts.Validators;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
 using Microsoft.EntityFrameworkCore;
@@ -15,18 +16,16 @@ internal class GetProductsHandler(ProductDbContext Context) : IGetProductsHandle
 
         var products = Products(query.StoreId);
 
-        if (query.Parameters.HasSorting)
-        {
-            products = SortedProducts(products, query.Parameters.SortBy!, query.Parameters.Direction);
-        }
+        var sortBy = SortBy(query.Parameters);
 
         if (query.HasSearch)
         {
-            products = FilterByName(products, query.SearchByName!);
-            
+            products = FilterByName(products, query.SearchByName.EscapeLikeInput());
         }
         
         var total = await products.CountAsync(token);
+
+        products = SortedProducts(products, sortBy, query.Parameters.Direction);
 
         var pagedList = OffsetList(products, query.Parameters.SkipCount(), query.Parameters.PageSize);
 
@@ -40,6 +39,11 @@ internal class GetProductsHandler(ProductDbContext Context) : IGetProductsHandle
         return Context.Products
             .AsNoTracking()
             .Where(c => c.StoreId == storeId);
+    }
+
+    private static string SortBy(PagedQueryParameters parameters)
+    {
+        return parameters.HasSorting ? parameters.SortBy : "name";
     }
 
     private static IQueryable<Product> SortedProducts(IQueryable<Product> products, string sortBy, Direction direction)
@@ -72,7 +76,7 @@ internal class GetProductsHandler(ProductDbContext Context) : IGetProductsHandle
 
     private static IQueryable<Product> FilterByName(IQueryable<Product> products, string searchBy)
     {
-        return products.Where(c => EF.Functions.ILike(c.Name, searchBy));
+        return products.Where(c => EF.Functions.ILike(c.Name, "%" + searchBy + "%"));
     }
 
     private static IQueryable<Product> OffsetList(IQueryable<Product> products, int skip, int pageSize)
