@@ -17,11 +17,23 @@ public class GlobalExceptionHandler(IProblemDetailsService ProblemDetailsService
         var title = "Server Error";
         var detail = "Internal Server Error";
 
-        if (exception is ConflictException conflictException)
+        if (exception is PreConditionFailedException preConditionFailedException)
+        {
+            statusCode = StatusCodes.Status412PreconditionFailed;
+            title = "Precondition Failed Exception";
+            detail = preConditionFailedException.Message;
+        }
+        else if (exception is ConflictException conflictException)
         {
             statusCode = StatusCodes.Status409Conflict;
             title = "Conflict Exception";
             detail = conflictException.Message;
+        }
+        else if (exception is NotFoundException notFoundException)
+        {
+            statusCode = StatusCodes.Status404NotFound;
+            title = "Not Found Exception";
+            detail = notFoundException.Message;
         }
         else if (exception is DomainException domainException)
         {
