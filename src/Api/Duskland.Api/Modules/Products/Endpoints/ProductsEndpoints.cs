@@ -27,7 +27,9 @@ public static class ProductsEndpoints
 
         group.MapGet("/{productId}/", GetProduct)
              .WithName("GetProduct")
-             .Produces<int>(StatusCodes.Status200OK);
+             .Produces<int>(StatusCodes.Status200OK)
+             .ProducesProblem(StatusCodes.Status404NotFound);
+
 
         group.MapGet("/", GetProducts)
              .WithName("GetProducts")
