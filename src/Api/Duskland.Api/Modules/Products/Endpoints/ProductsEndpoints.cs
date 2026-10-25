@@ -7,7 +7,6 @@ using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct.Command;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Duskland.Api.Modules.Products.Endpoints;
@@ -30,14 +29,12 @@ public static class ProductsEndpoints
              .Produces<int>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
-
         group.MapGet("/", GetProducts)
              .WithName("GetProducts")
              .Produces<PagedList<ProductDto>>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status400BadRequest);
-
         
-        group.MapPatch("/", PatchProduct)
+        group.MapPatch("/{productId}/", PatchProduct)
              .WithName("PatchProduct")
              .Produces<NoContentResult>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -63,11 +60,11 @@ public static class ProductsEndpoints
         return result;
     }
 
-    private static async Task<IResult> PatchProduct(Guid storeId, UpdateProductRequest request, IUpdateProductHandler handler, HttpContext context, CancellationToken token)
+    private static async Task<IResult> PatchProduct(Guid storeId, Guid productId, UpdateProductRequest request, IUpdateProductHandler handler, HttpContext context, CancellationToken token)
     {
         var version = context.GetIfMatchStamp();
 
-        var command = new UpdateProductCommand(request.Id, storeId, request.Name, request.Price, version);
+        var command = new UpdateProductCommand(productId, storeId, request.Name, request.Price, version);
 
         await handler.Handle(command, token);
 
@@ -76,11 +73,11 @@ public static class ProductsEndpoints
 
     private static async Task<ProductDto> GetProduct(Guid storeId, Guid productId, IGetProductHandler handler, HttpContext context, CancellationToken token)
     {
-        var query = new GetProductQuery(productId);
+        var query = new GetProductQuery(productId, storeId);
 
         var result = await handler.Handle(query, token);
 
-        context.Response.Headers.ETag = result.Version.ToString();
+        context.AddETagToResponse(result.Version);
 
         return result.Product;
     }

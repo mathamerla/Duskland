@@ -19,7 +19,7 @@ public static class HttpContextExtensions
 
         if (string.IsNullOrEmpty(ifMatchHeader))
         {
-            throw new PreConditionFailedException("Missing version in the request");
+            throw new PreconditionMissingException("Missing version in the request");
         }
 
         var cleanETag = ifMatchHeader.Trim('"');
@@ -30,5 +30,10 @@ public static class HttpContextExtensions
         }
 
         return version;
+    }
+
+    public static void AddETagToResponse(this HttpContext context, Guid version)
+    {
+        context.Response.Headers.ETag = $"\"{version:D}\"";       
     }
 }
