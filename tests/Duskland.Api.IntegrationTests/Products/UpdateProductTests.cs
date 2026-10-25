@@ -153,9 +153,9 @@ public class UpdateProductTests : IClassFixture<DusklandWebApplicationFactory>
     private async Task<HttpResponseMessage> PatchAsync(
         Product product, string? version, Guid? storeId = null, string name = "Updated apple", decimal price = 25m)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/stores/{storeId ?? _storeId}/products")
+        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/stores/{storeId ?? _storeId}/products/{product.Id}")
         {
-            Content = JsonContent.Create(new UpdateProductRequest(product.Id, product.SKU, name, price))
+            Content = JsonContent.Create(new UpdateProductRequest(name, price))
         };
         if (version is not null)
         {

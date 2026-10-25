@@ -49,6 +49,16 @@ public class GetProductTests : IClassFixture<DusklandWebApplicationFactory>
         await AssertNotFoundAsync(response, missingId);
     }
 
+    [Fact]
+    public async Task GetProduct_OtherStore_Returns404WithMessage()
+    {
+        var product = Product.Create(Guid.NewGuid(), "SKU-1", "Apple", 10m);
+        await _factory.InsertIntoTable([product]);
+
+        using var response = await _httpClient.GetAsync(BuildUrl(product.Id));
+
+        await AssertNotFoundAsync(response, product.Id);
+    }
 
     [Fact]
     public async Task GetProduct_AfterUpdate_ReturnsUpdatedDetailsAndNewVersion()
@@ -58,9 +68,9 @@ public class GetProductTests : IClassFixture<DusklandWebApplicationFactory>
         using var initialResponse = await _httpClient.GetAsync(BuildUrl(product.Id));
         Assert.Equal(HttpStatusCode.OK, initialResponse.StatusCode);
         var originalVersion = GetVersion(initialResponse);
-        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/stores/{_storeId}/products")
+        using var request = new HttpRequestMessage(HttpMethod.Patch, $"/api/stores/{_storeId}/products/{product.Id}")
         {
-            Content = JsonContent.Create(new UpdateProductRequest(product.Id, product.SKU, "Updated apple", 25m))
+            Content = JsonContent.Create(new UpdateProductRequest("Updated apple", 25m))
         };
         request.Headers.TryAddWithoutValidation("If-Match", Assert.Single(initialResponse.Headers.GetValues("ETag")));
         using var updateResponse = await _httpClient.SendAsync(request);

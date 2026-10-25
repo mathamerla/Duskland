@@ -11,17 +11,17 @@ internal class UpdateProductHandler(ProductDbContext Context): IUpdateProductHan
 {
     public async Task Handle(UpdateProductCommand command, CancellationToken token)
     {
-        var product = await Product(command.Id, command.Version, token);
+        var product = await Product(command.Id,command.StoreId, command.Version, token);
 
         product.UpdateDetails(command.Name, command.Price);
 
         await UpdateProduct(token);
     }
 
-    private async Task<Product> Product(Guid id,  Guid version, CancellationToken token)
+    private async Task<Product> Product(Guid id, Guid storeId,  Guid version, CancellationToken token)
     {
         var product = await Context.Products
-            .FirstOrDefaultAsync(c => c.Id == id, token)
+            .FirstOrDefaultAsync(c => c.Id == id && c.StoreId == storeId, token)
                 ?? throw new NotFoundException($"Product with Id {id} not found");
         
         if (product.Version != version)

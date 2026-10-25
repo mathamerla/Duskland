@@ -40,15 +40,36 @@ public class Product
 
     public void ChangePrice(decimal price)
     {
-        if (price < 0m)
-        {
-            throw new DomainException("Product price can't be below zero");    
-        }
+        ValidatePrice(price);
 
         Price = price; 
     }
 
     public void ChangeName(string name)
+    {
+        ValidateName(name);
+
+        Name = name;
+    }
+
+    public void UpdateDetails(string name, decimal price)
+    {
+        ValidatePrice(price);
+        ValidateName(name);
+        ChangeName(name);
+        ChangePrice(price);
+        ElevateVersion();
+    }
+
+    private static void ValidatePrice(decimal price)
+    {
+        if (price < 0m)
+        {
+            throw new DomainException("Product price can't be below zero");    
+        }
+    }
+
+    private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -59,15 +80,6 @@ public class Product
         {
             throw new DomainException("Prodcut name need to be between 3 and 200 characters");    
         }
-
-        Name = name;
-    }
-
-    public void UpdateDetails(string name, decimal price)
-    {
-        ChangeName(name);
-        ChangePrice(price);
-        ElevateVersion();
     }
 
     private void ChangeStoreId(Guid storeId)
