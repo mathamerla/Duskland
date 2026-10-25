@@ -74,17 +74,24 @@ public class UpdateProductTests
         Assert.Equal(originalVersion, product.Version);
     }
 
-    [Fact]
-    public void UpdateDetails_NegativePrice_ThrowsWithoutChangingPriceOrVersion()
+    [Theory]
+    [InlineData(-0.01)]
+    [InlineData(-1)]
+    [InlineData(-100)]
+    public void UpdateDetails_NegativePrice_ThrowsWithoutChangingNamePriceOrVersion(decimal invalidPrice)
     {
         var product = Product.Create(Guid.NewGuid(), "SKU-1", "Apple", 10m);
         var originalVersion = product.Version;
 
-        var exception = Assert.Throws<DomainException>(() => product.UpdateDetails("Updated apple", -1m));
+        var originalName = product.Name;
+        var originalPrice = product.Price;
+
+        var exception = Assert.Throws<DomainException>(() => product.UpdateDetails("Updated apple", invalidPrice));
 
         Assert.Equal("Product price can't be below zero", exception.Message);
 
-        Assert.Equal(10m, product.Price);
+        Assert.Equal(originalName, product.Name);
+        Assert.Equal(originalPrice, product.Price);
         Assert.Equal(originalVersion, product.Version);
     }
 }

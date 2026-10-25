@@ -26,7 +26,7 @@ public static class ProductsEndpoints
 
         group.MapGet("/{productId}/", GetProduct)
              .WithName("GetProduct")
-             .Produces<int>(StatusCodes.Status200OK)
+             .Produces<ProductDto>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/", GetProducts)
@@ -36,9 +36,10 @@ public static class ProductsEndpoints
         
         group.MapPatch("/{productId}/", PatchProduct)
              .WithName("PatchProduct")
-             .Produces<NoContentResult>(StatusCodes.Status200OK)
+             .Produces<NoContentResult>(StatusCodes.Status204NoContent)
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status412PreconditionFailed)
+             .ProducesProblem(StatusCodes.Status428PreconditionRequired)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;

@@ -12,7 +12,7 @@ public static class HttpContextExtensions
     
         if (!headerExists)
         {
-            throw new PreConditionFailedException("Missing version in the request");
+            throw new PreconditionMissingException("Missing version in the request");
         }
 
         var ifMatchHeader = ifMatchHeaderCollection.First()?.ToString();

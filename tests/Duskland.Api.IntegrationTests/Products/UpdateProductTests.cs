@@ -46,16 +46,16 @@ public class UpdateProductTests : IClassFixture<DusklandWebApplicationFactory>
 
     [Theory]
     [InlineData(null, "Missing version in the request")]
-    [InlineData("not-a-guid", "Incorrect format of the version in the request")]
-    [InlineData("*", "Incorrect format of the version in the request")]
-    [InlineData("W/\"00000000-0000-0000-0000-000000000001\"", "Incorrect format of the version in the request")]
-    public async Task UpdateProduct_MissingOrInvalidVersion_Returns412WithoutChanges(string? version, string expectedDetail)
+    [InlineData("not-a-guid", "Incorrect format of the version in the request", HttpStatusCode.PreconditionFailed)]
+    [InlineData("*", "Incorrect format of the version in the request", HttpStatusCode.PreconditionFailed)]
+    [InlineData("W/\"00000000-0000-0000-0000-000000000001\"", "Incorrect format of the version in the request", HttpStatusCode.PreconditionFailed)]
+    public async Task UpdateProduct_MissingOrInvalidVersion_Returns412WithoutChanges(string? version, string expectedDetail, HttpStatusCode statusCode = HttpStatusCode.PreconditionRequired)
     {
         var product = await SeedProductAsync();
 
         using var response = await PatchAsync(product, version);
 
-        await AssertProblemAsync(response, HttpStatusCode.PreconditionFailed, expectedDetail);
+        await AssertProblemAsync(response, statusCode, expectedDetail);
         await AssertUnchangedAsync(product);
     }
 
@@ -80,6 +80,19 @@ public class UpdateProductTests : IClassFixture<DusklandWebApplicationFactory>
 
         await AssertProblemAsync(response, HttpStatusCode.NotFound, $"Product with Id {product.Id} not found");
         Assert.Empty(await _factory.GetTable<Product>());
+    }
+
+    [Fact]
+    public async Task UpdateProduct_ValidDataButWrongStoreId_Returns404WithoutChanges()
+    {
+        var product = await SeedProductAsync();
+        var wrongStoreId = Guid.NewGuid();
+
+        using var response = await PatchAsync(product, $"\"{product.Version}\"",
+            storeId: wrongStoreId, name: "Updated apple", price: 25m);
+
+        await AssertProblemAsync(response, HttpStatusCode.NotFound, $"Product with Id {product.Id} not found");
+        await AssertUnchangedAsync(product);
     }
 
     [Theory]
