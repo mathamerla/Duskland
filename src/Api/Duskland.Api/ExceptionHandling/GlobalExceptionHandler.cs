@@ -17,7 +17,13 @@ public class GlobalExceptionHandler(IProblemDetailsService ProblemDetailsService
         var title = "Server Error";
         var detail = "Internal Server Error";
 
-        if (exception is PreConditionFailedException preConditionFailedException)
+        if (exception is PreconditionMissingException preconditionMissingException)
+        {
+            statusCode = StatusCodes.Status428PreconditionRequired;
+            title = "Precondition Missing Exception";
+            detail = preconditionMissingException.Message;
+        }
+        else if (exception is PreConditionFailedException preConditionFailedException)
         {
             statusCode = StatusCodes.Status412PreconditionFailed;
             title = "Precondition Failed Exception";
