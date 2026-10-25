@@ -51,10 +51,15 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
                     b.Property<Guid>("StoreId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StoreId", "SKU")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_Products_StoreId_SKU");
 
                     b.ToTable("Products", "product");
                 });

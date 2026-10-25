@@ -24,7 +24,8 @@ public class Product
         product.ChangeName(name);
         product.ChangePrice(price);
         product.ChangeSKU(sku);
-
+        product.ElevateVersion();
+        
         return product;
     }
 
@@ -35,18 +36,40 @@ public class Product
     public decimal Price { get; private set; }
     public bool IsActive { get; private set; }
     public DateTimeOffset CreatedAt { get; private set; }
+    public Guid Version { get; private set; }
 
     public void ChangePrice(decimal price)
     {
-        if (price < 0m)
-        {
-            throw new DomainException("Product price can't be below zero");    
-        }
+        ValidatePrice(price);
 
         Price = price; 
     }
 
     public void ChangeName(string name)
+    {
+        ValidateName(name);
+
+        Name = name;
+    }
+
+    public void UpdateDetails(string name, decimal price)
+    {
+        ValidatePrice(price);
+        ValidateName(name);
+        ChangeName(name);
+        ChangePrice(price);
+        ElevateVersion();
+    }
+
+    private static void ValidatePrice(decimal price)
+    {
+        if (price < 0m)
+        {
+            throw new DomainException("Product price can't be below zero");    
+        }
+    }
+
+    private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -57,8 +80,6 @@ public class Product
         {
             throw new DomainException("Prodcut name need to be between 3 and 200 characters");    
         }
-
-        Name = name;
     }
 
     private void ChangeStoreId(Guid storeId)
@@ -84,5 +105,10 @@ public class Product
         }
 
         SKU = sku;
+    }
+
+    private void ElevateVersion()
+    {
+        Version = Guid.NewGuid();
     }
 }

@@ -1,8 +1,12 @@
+using Duskland.Api.Extensions;
 using Duskland.Api.Modules.Products.Requests;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
+using Duskland.Modules.Products.Contracts.Features.GetProduct;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
+using Duskland.Modules.Products.Contracts.Features.UpdateProduct;
+using Duskland.Modules.Products.Contracts.Features.UpdateProduct.Command;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Duskland.Api.Modules.Products.Endpoints;
@@ -20,14 +24,23 @@ public static class ProductsEndpoints
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status409Conflict); 
 
-        group.MapGet("/{productId}/", GetFakeProduct)
+        group.MapGet("/{productId}/", GetProduct)
              .WithName("GetProduct")
-             .Produces<int>(StatusCodes.Status200OK);
+             .Produces<ProductDto>(StatusCodes.Status200OK)
+             .ProducesProblem(StatusCodes.Status404NotFound);
 
         group.MapGet("/", GetProducts)
              .WithName("GetProducts")
              .Produces<PagedList<ProductDto>>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status400BadRequest);
+        
+        group.MapPatch("/{productId}/", PatchProduct)
+             .WithName("PatchProduct")
+             .Produces<NoContentResult>(StatusCodes.Status204NoContent)
+             .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status412PreconditionFailed)
+             .ProducesProblem(StatusCodes.Status428PreconditionRequired)
+             .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }
@@ -48,8 +61,25 @@ public static class ProductsEndpoints
         return result;
     }
 
-    private static string GetFakeProduct(Guid storeId, Guid productId)
+    private static async Task<IResult> PatchProduct(Guid storeId, Guid productId, UpdateProductRequest request, IUpdateProductHandler handler, HttpContext context, CancellationToken token)
     {
-        return $"Fake product {productId} for store {storeId}";
+        var version = context.GetIfMatchStamp();
+
+        var command = new UpdateProductCommand(productId, storeId, request.Name, request.Price, version);
+
+        await handler.Handle(command, token);
+
+        return Results.NoContent();
+    }
+
+    private static async Task<ProductDto> GetProduct(Guid storeId, Guid productId, IGetProductHandler handler, HttpContext context, CancellationToken token)
+    {
+        var query = new GetProductQuery(productId, storeId);
+
+        var result = await handler.Handle(query, token);
+
+        context.AddETagToResponse(result.Version);
+
+        return result.Product;
     }
 }
