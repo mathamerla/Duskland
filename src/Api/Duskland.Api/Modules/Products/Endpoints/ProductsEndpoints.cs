@@ -5,6 +5,8 @@ using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
 using Duskland.Modules.Products.Contracts.Features.GetProduct;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
+using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
+using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Queries;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct.Command;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +36,12 @@ public static class ProductsEndpoints
              .Produces<PagedList<ProductDto>>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status400BadRequest);
         
+        group.MapGet("/scroll/", GetProductsKeyset)
+             .WithName("GetProductsKeyset")
+             .Produces<KeysetPagedList<ProductDto>>(StatusCodes.Status200OK)
+             .ProducesProblem(StatusCodes.Status400BadRequest);
+        
+
         group.MapPatch("/{productId}/", PatchProduct)
              .WithName("PatchProduct")
              .Produces<NoContentResult>(StatusCodes.Status204NoContent)
@@ -56,6 +64,14 @@ public static class ProductsEndpoints
     private static async Task<PagedList<ProductDto>> GetProducts(Guid storeId, [AsParameters]PagedQueryParameters parameters, [FromQuery]string? searchBy, IGetProductsHandler handler, CancellationToken token)
     {
         var query = new GetProductsQuery(parameters, storeId, searchBy ?? string.Empty);
+        var result = await handler.Handle(query, token);
+
+        return result;
+    }
+
+    private static async Task<KeysetPagedList<ProductDto>> GetProductsKeyset(Guid storeId, [AsParameters]KeysetPagedQueryParameters parameters, IGetProductsKeysetPaginationHandler handler, CancellationToken token)
+    {
+        var query = new GetProductsKeysetPaginationQuery(storeId, parameters.PageSize, parameters.Cursor);
         var result = await handler.Handle(query, token);
 
         return result;

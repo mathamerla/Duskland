@@ -32,6 +32,9 @@ internal class ProductDbContext: DbContext
                 .HasDatabaseName("IX_Products_StoreId_SKU")
                 .IsUnique();
 
+            entity.HasIndex(e => new { e.StoreId, e.Price, e.Id })
+                .HasDatabaseName("IX_Products_StoreId_Price_Id");
+                
             entity.Property(p => p.Version)
                 .IsConcurrencyToken(); 
         });

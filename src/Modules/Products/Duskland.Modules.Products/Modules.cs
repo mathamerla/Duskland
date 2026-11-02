@@ -10,6 +10,8 @@ using Duskland.Modules.Products.Contracts.Features.UpdateProduct;
 using Duskland.Modules.Products.Features.UpdateProduct;
 using Duskland.Modules.Products.Contracts.Features.GetProduct;
 using Duskland.Modules.Products.Features.GetProduct;
+using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Queries;
+using Duskland.Modules.Products.Features.GetProductsKeyset;
 
 namespace Duskland.Modules.Products;
 
@@ -25,6 +27,7 @@ public static class ProductModules
 
         services.AddScoped<ICreateProductHandler, CreateProductHandler>();
         services.AddScoped<IGetProductsHandler, GetProductsHandler>();
+        services.AddScoped<IGetProductsKeysetPaginationHandler, GetProductsKeysetPaginationHandler>();
         services.AddScoped<IUpdateProductHandler, UpdateProductHandler>();
         services.AddScoped<IGetProductHandler, GetProductHandler>();
 
