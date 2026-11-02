@@ -61,6 +61,9 @@ namespace Duskland.Modules.Products.Infrastructure.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("IX_Products_StoreId_SKU");
 
+                    b.HasIndex("StoreId", "Price", "Id")
+                        .HasDatabaseName("IX_Products_StoreId_Price_Id");
+
                     b.ToTable("Products", "product");
                 });
 #pragma warning restore 612, 618
