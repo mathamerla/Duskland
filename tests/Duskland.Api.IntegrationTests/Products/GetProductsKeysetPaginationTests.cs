@@ -23,6 +23,33 @@ public class GetProductsKeysetPaginationTests : IClassFixture<DusklandWebApplica
         factory.ClearTable<Product>();
     }
 
+    [Fact]
+    public async Task GetProductsKeyset_NoQueryParameters_ReturnsFirstPageWithDefaultPageSize()
+    {
+        var products = Enumerable.Range(1, 21)
+            .Select(index => Product.Create(_storeId, $"SKU-{index}", $"Product {index}", index))
+            .Reverse()
+            .ToArray();
+        await _factory.InsertIntoTable(products);
+
+        using var response = await _httpClient.GetAsync($"/api/stores/{_storeId}/products/scroll/");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var page = await response.Content.ReadFromJsonAsync<KeysetPagedList<ProductDto>>();
+        Assert.NotNull(page);
+        Assert.Equal(20, page.PageSize);
+        Assert.Equal(20, page.Items.Count());
+        Assert.Equal(products.OrderBy(p => p.Price).Take(20).Select(p => p.Id), page.Items.Select(p => p.Id));
+        Assert.True(page.HasMore);
+        Assert.False(string.IsNullOrWhiteSpace(page.NextCursor));
+
+        var nextPage = await GetPageAsync(page.PageSize, page.NextCursor);
+
+        Assert.Equal(products.Single(p => p.Price == 21m).Id, Assert.Single(nextPage.Items).Id);
+        Assert.False(nextPage.HasMore);
+        Assert.Equal(string.Empty, nextPage.NextCursor);
+    }
+
     [Theory]
     [InlineData(1, false)]
     [InlineData(2, false)]

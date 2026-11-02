@@ -69,7 +69,7 @@ public static class ProductsEndpoints
         return result;
     }
 
-    private static async Task<KeysetPagedList<ProductDto>> GetProductsKeyset(Guid storeId, [AsParameters]KeysetPagedQueryParameters parameters, [FromQuery]string? searchBy, IGetProductsKeysetPaginationHandler handler, CancellationToken token)
+    private static async Task<KeysetPagedList<ProductDto>> GetProductsKeyset(Guid storeId, [AsParameters]KeysetPagedQueryParameters parameters, IGetProductsKeysetPaginationHandler handler, CancellationToken token)
     {
         var query = new GetProductsKeysetPaginationQuery(storeId, parameters.PageSize, parameters.Cursor);
         var result = await handler.Handle(query, token);
