@@ -38,7 +38,7 @@ public static class ProductsEndpoints
         
         group.MapGet("/scroll/", GetProductsKeyset)
              .WithName("GetProductsKeyset")
-             .Produces<PagedList<ProductDto>>(StatusCodes.Status200OK)
+             .Produces<KeysetPagedList<ProductDto>>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status400BadRequest);
         
 

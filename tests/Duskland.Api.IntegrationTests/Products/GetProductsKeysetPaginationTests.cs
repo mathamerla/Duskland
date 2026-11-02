@@ -1,9 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using Duskland.Api.IntegrationTests.Infrastructure;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
 using Duskland.Modules.Products.Domain;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Duskland.Api.IntegrationTests.Products;
 
@@ -111,6 +114,45 @@ public class GetProductsKeysetPaginationTests : IClassFixture<DusklandWebApplica
         Assert.Empty(page.Items);
         Assert.False(page.HasMore);
         Assert.Equal(string.Empty, page.NextCursor);
+    }
+
+    [Theory]
+    [InlineData("%%%")]
+    [InlineData("a")]
+    [InlineData("invalid cursor!")]
+    public async Task GetProductsKeyset_InvalidBase64UrlCursor_Returns400BadRequest(string cursor)
+    {
+        await AssertInvalidCursorAsync(cursor);
+    }
+
+    [Theory]
+    [InlineData("not json")]
+    [InlineData("{\"Price\":")]
+    [InlineData("[]")]
+    [InlineData("{}")]
+    [InlineData("{\"Price\":10}")]
+    [InlineData("{\"Id\":\"00000000-0000-0000-0000-000000000001\"}")]
+    [InlineData("{\"Price\":\"invalid\",\"Id\":\"00000000-0000-0000-0000-000000000001\"}")]
+    [InlineData("{\"Price\":10,\"Id\":\"invalid\"}")]
+    [InlineData("{\"Price\":null,\"Id\":\"00000000-0000-0000-0000-000000000001\"}")]
+    [InlineData("{\"Price\":10,\"Id\":null}")]
+    public async Task GetProductsKeyset_Base64UrlCursorWithInvalidPayload_Returns400BadRequest(string payload)
+    {
+        var cursor = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(payload));
+
+        await AssertInvalidCursorAsync(cursor);
+    }
+
+    private async Task AssertInvalidCursorAsync(string cursor)
+    {
+        using var response = await _httpClient.GetAsync(
+            $"/api/stores/{_storeId}/products/scroll/?PageSize=2&Cursor={Uri.EscapeDataString(cursor)}");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        Assert.NotNull(problem);
+        Assert.Equal(400, problem.Status);
+        Assert.Equal("Invalid cursor format.", problem.Detail);
     }
 
     private async Task<KeysetPagedList<ProductDto>> GetPageAsync(int pageSize, string cursor = "")

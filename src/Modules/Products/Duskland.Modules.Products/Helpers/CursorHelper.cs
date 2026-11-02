@@ -22,17 +22,10 @@ public static class CursorHelper<T> where T : class
             return null;
         }
 
-        try
-        {
-            var bytes = WebEncoders.Base64UrlDecode(cursor);
-            var json = Encoding.UTF8.GetString(bytes);
+        var bytes = WebEncoders.Base64UrlDecode(cursor);
+        var json = Encoding.UTF8.GetString(bytes);
 
-            return JsonSerializer.Deserialize<T>(json);
-        }
-        catch
-        {
-            return null; 
-        }
+        return JsonSerializer.Deserialize<T>(json);
     }
 }
 

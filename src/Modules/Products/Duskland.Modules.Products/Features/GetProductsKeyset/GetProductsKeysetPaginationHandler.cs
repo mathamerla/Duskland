@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Queries;
@@ -36,8 +37,14 @@ internal class GetProductsKeysetPaginationHandler(ProductDbContext Context) : IG
             return null; 
         }
 
-        return CursorHelper<ProductPriceIdCursor>.Deserialize(cursor) 
-            ?? throw new DomainException("Invalid cursor format.");
+        try
+        {
+            return CursorHelper<ProductPriceIdCursor>.Deserialize(cursor);
+        }
+        catch (Exception ex) when (ex is JsonException || ex is FormatException)
+        {
+            throw new DomainException("Invalid cursor format.");
+        }
     }
 
     private async Task<List<ProductDto>> GetProductsAsync(Guid storeId, ProductPriceIdCursor? cursorData, int pageSize, CancellationToken cancellationToken)
