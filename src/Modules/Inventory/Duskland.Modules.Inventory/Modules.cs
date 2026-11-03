@@ -1,4 +1,6 @@
 using Duskland.Modules.Inventory.Infrastructure.Context;
+using Duskland.Modules.Inventory.Contracts.Features.CreateStock;
+using Duskland.Modules.Inventory.Features.CreateStock;
 using EntityFramework.Exceptions.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +16,8 @@ public static class InventoryModules
                 x => x.MigrationsHistoryTable("__EFMigrationsHistory", InventoryDbContext.SCHEMA)  
             ).UseExceptionProcessor()
         ); 
+
+        services.AddScoped<ICreateStockHandler, CreateStockHandler>();
 
         return services;
     }

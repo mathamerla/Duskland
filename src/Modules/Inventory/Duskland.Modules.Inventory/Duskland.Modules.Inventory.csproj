@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Duskland.BuildingBlocks\Duskland.BuildingBlocks.csproj" />
     <ProjectReference Include="..\Duskland.Modules.Inventory.Contracts\Duskland.Modules.Inventory.Contracts.csproj" />
+    <ProjectReference Include="..\..\Products\Duskland.Modules.Products.Contracts\Duskland.Modules.Products.Contracts.csproj" />
   </ItemGroup>
 
     <ItemGroup>
