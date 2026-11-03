@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Duskland.Modules.Inventory.Infrastructure.Context;
 
-public class InventoryDbContext: DbContext
+internal class InventoryDbContext: DbContext
 {
     public const string SCHEMA = "inventory";
 

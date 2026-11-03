@@ -8,7 +8,7 @@ using EntityFramework.Exceptions.Common;
 
 namespace Duskland.Modules.Inventory.Features.CreateStock;
 
-public class CreateStockHandler(InventoryDbContext Context, IGetProductHandler ProductHandler) : ICreateStockHandler
+internal class CreateStockHandler(InventoryDbContext Context, IGetProductHandler ProductHandler) : ICreateStockHandler
 {
     public async Task<Guid> Handle(CreateStockCommand command, CancellationToken cancellationToken)
     {
