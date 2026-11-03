@@ -29,6 +29,24 @@ public class GlobalExceptionHandler(IProblemDetailsService ProblemDetailsService
             title = "Precondition Failed Exception";
             detail = preConditionFailedException.Message;
         }
+        else if (exception is Duskland.BuildingBlocks.Infrastructure.Exceptions.ConflictException commonConflict)
+        {
+            statusCode = StatusCodes.Status409Conflict;
+            title = "Conflict Exception";
+            detail = commonConflict.Message;
+        }
+        else if (exception is Duskland.BuildingBlocks.Infrastructure.Exceptions.NotFoundException commonNotFoundException)
+        {
+            statusCode = StatusCodes.Status404NotFound;
+            title = "Not Found Exception";
+            detail = commonNotFoundException.Message;
+        }
+        else if (exception is Duskland.BuildingBlocks.Domain.Exceptions.DomainException commonDomain)
+        {
+            statusCode = StatusCodes.Status400BadRequest;
+            title = "Domain Exception";
+            detail = commonDomain.Message;
+        }
         else if (exception is ConflictException conflictException)
         {
             statusCode = StatusCodes.Status409Conflict;
