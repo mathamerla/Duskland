@@ -1,8 +1,8 @@
+using Duskland.BuildingBlocks.Infrastructure.Exceptions;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct.Command;
 using Duskland.Modules.Products.Domain;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
-using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Duskland.Modules.Products.Features.UpdateProduct;

@@ -1,5 +1,5 @@
 using System;
 
-namespace Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
+namespace Duskland.BuildingBlocks.Application.Requests;
 
 public record KeysetPagedQueryParameters(string Cursor = "", int PageSize = 20);

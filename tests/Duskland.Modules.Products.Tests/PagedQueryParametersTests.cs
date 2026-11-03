@@ -1,5 +1,5 @@
-using Duskland.Modules.Products.Contracts.Common;
-using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
+using Duskland.BuildingBlocks.Application.Requests;
+using Duskland.BuildingBlocks.Application.Exceptions;
 
 namespace Duskland.Modules.Products.Tests;
 

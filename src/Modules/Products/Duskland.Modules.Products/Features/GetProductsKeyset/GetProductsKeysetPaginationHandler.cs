@@ -1,11 +1,11 @@
+using Duskland.BuildingBlocks.Application.Helpers;
+using Duskland.BuildingBlocks.Domain.Exceptions;
+using Duskland.BuildingBlocks.Application.Responses;
 using System.Text.Json;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
-using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Queries;
-using Duskland.Modules.Products.Domain.Common;
 using Duskland.Modules.Products.Features.GetProductsKeyset.Cursor;
 using Duskland.Modules.Products.Features.GetProductsKeyset.Validators;
-using Duskland.Modules.Products.Helpers;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 

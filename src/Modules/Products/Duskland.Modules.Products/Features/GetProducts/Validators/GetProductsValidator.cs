@@ -1,6 +1,6 @@
 using System;
+using Duskland.BuildingBlocks.Domain.Exceptions;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
-using Duskland.Modules.Products.Domain.Common;
 
 namespace Duskland.Modules.Products.Features.GetProducts.Validators;
 

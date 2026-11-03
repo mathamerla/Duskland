@@ -1,9 +1,9 @@
+using Duskland.BuildingBlocks.Application.Responses;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using Duskland.Api.IntegrationTests.Infrastructure;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
-using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
 using Duskland.Modules.Products.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;

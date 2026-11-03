@@ -1,4 +1,4 @@
-using Duskland.Modules.Products.Domain.Common;
+using Duskland.BuildingBlocks.Domain.Exceptions;
 
 namespace Duskland.Modules.Products.Domain;
 

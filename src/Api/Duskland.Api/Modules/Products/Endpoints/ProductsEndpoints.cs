@@ -1,3 +1,5 @@
+using Duskland.BuildingBlocks.Application.Responses;
+using Duskland.BuildingBlocks.Application.Requests;
 using Duskland.Api.Extensions;
 using Duskland.Api.Modules.Products.Requests;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct;
@@ -5,7 +7,6 @@ using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
 using Duskland.Modules.Products.Contracts.Features.GetProduct;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
-using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Queries;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct;
 using Duskland.Modules.Products.Contracts.Features.UpdateProduct.Command;

@@ -1,6 +1,6 @@
-using Duskland.Modules.Products.Contracts.Common;
-using Duskland.Modules.Products.Domain.Common;
-using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
+using Duskland.BuildingBlocks.Application.Exceptions;
+using Duskland.BuildingBlocks.Domain.Exceptions;
+using Duskland.BuildingBlocks.Infrastructure.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -28,24 +28,6 @@ public class GlobalExceptionHandler(IProblemDetailsService ProblemDetailsService
             statusCode = StatusCodes.Status412PreconditionFailed;
             title = "Precondition Failed Exception";
             detail = preConditionFailedException.Message;
-        }
-        else if (exception is Duskland.BuildingBlocks.Infrastructure.Exceptions.ConflictException commonConflict)
-        {
-            statusCode = StatusCodes.Status409Conflict;
-            title = "Conflict Exception";
-            detail = commonConflict.Message;
-        }
-        else if (exception is Duskland.BuildingBlocks.Infrastructure.Exceptions.NotFoundException commonNotFoundException)
-        {
-            statusCode = StatusCodes.Status404NotFound;
-            title = "Not Found Exception";
-            detail = commonNotFoundException.Message;
-        }
-        else if (exception is Duskland.BuildingBlocks.Domain.Exceptions.DomainException commonDomain)
-        {
-            statusCode = StatusCodes.Status400BadRequest;
-            title = "Domain Exception";
-            detail = commonDomain.Message;
         }
         else if (exception is ConflictException conflictException)
         {

@@ -1,4 +1,5 @@
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
+using Duskland.BuildingBlocks.Application.Responses;
 
 namespace Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
 
