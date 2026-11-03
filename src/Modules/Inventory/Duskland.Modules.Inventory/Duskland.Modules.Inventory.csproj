@@ -11,4 +11,11 @@
     <ProjectReference Include="..\Duskland.Modules.Inventory.Contracts\Duskland.Modules.Inventory.Contracts.csproj" />
   </ItemGroup>
 
+    <ItemGroup>
+    <PackageReference Include="EntityFrameworkCore.Exceptions.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+  </ItemGroup>
+
 </Project>

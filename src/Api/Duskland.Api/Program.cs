@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Duskland.Api.ExceptionHandling;
 using Duskland.Api.Modules.Products.Endpoints;
+using Duskland.Modules.Inventory;
 using Duskland.Modules.Products;
 using Scalar.AspNetCore;
 
@@ -11,6 +12,7 @@ var connectionString = builder.Configuration.GetConnectionString("ProductConnect
     ?? throw new InvalidOperationException("Missing connection string");
 
 ProductModules.RegisterModules(builder.Services, connectionString);
+InventoryModules.RegisterModules(builder.Services, connectionString);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
