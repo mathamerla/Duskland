@@ -37,6 +37,11 @@ public class Stock
             throw new DomainException("Quantity cannot be negative.");
         }
 
+        if (quantity < ReservedQuantity)
+        {
+            throw new DomainException("Quantity cannot be lower than reserved quantity.");
+        }
+
         Quantity = quantity;
         ElevateVersion();
     }
@@ -45,15 +50,15 @@ public class Stock
     {
         if (quantity < 0)
         {
-            throw new DomainException("Quantity to reserve cannot be negative.");
+            throw new DomainException("Quantity cannot be negative.");
         }
 
         if (quantity > AvailableQuantity)
         {
-            throw new DomainException("Not enough available stock to reserve.");
+            throw new DomainException("Quantity cannot be lower than reserved quantity.");
         }
 
-        ReservedQuantity += quantity;
+        Quantity -= quantity;
         ElevateVersion();
     }
 

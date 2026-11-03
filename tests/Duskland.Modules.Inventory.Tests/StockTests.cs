@@ -55,7 +55,7 @@ public class StockTests
     public void AddStock_WithReservations_IncreasesQuantityAndPreservesReservations(int quantity)
     {
         var stock = CreateStock();
-        stock.RemoveStock(3);
+        SetReservedQuantity(stock, 3);
         var version = stock.Version;
 
         stock.AddStock(quantity);
@@ -70,29 +70,29 @@ public class StockTests
     [InlineData(0)]
     [InlineData(4)]
     [InlineData(10)]
-    public void RemoveStock_AvailableQuantity_ReservesStockAndChangesVersion(int quantity)
+    public void RemoveStock_AvailableQuantity_DecreasesQuantityAndChangesVersion(int quantity)
     {
         var stock = CreateStock();
         var version = stock.Version;
 
         stock.RemoveStock(quantity);
 
-        Assert.Equal(10, stock.Quantity);
-        Assert.Equal(quantity, stock.ReservedQuantity);
+        Assert.Equal(10 - quantity, stock.Quantity);
+        Assert.Equal(0, stock.ReservedQuantity);
         Assert.Equal(10 - quantity, stock.AvailableQuantity);
         Assert.NotEqual(version, stock.Version);
     }
 
     [Fact]
-    public void RemoveStock_RepeatedReservations_UsesRemainingAvailableQuantity()
+    public void RemoveStock_RepeatedRemovals_UsesRemainingAvailableQuantity()
     {
         var stock = CreateStock();
 
         stock.RemoveStock(3);
         stock.RemoveStock(7);
 
-        Assert.Equal(10, stock.Quantity);
-        Assert.Equal(10, stock.ReservedQuantity);
+        Assert.Equal(0, stock.Quantity);
+        Assert.Equal(0, stock.ReservedQuantity);
         Assert.Equal(0, stock.AvailableQuantity);
     }
 
@@ -103,12 +103,12 @@ public class StockTests
     public void RemoveStock_InsufficientAvailableQuantity_ThrowsWithoutChangingStock(int reserved, int quantity)
     {
         var stock = CreateStock();
-        stock.RemoveStock(reserved);
+        SetReservedQuantity(stock, reserved);
         var version = stock.Version;
 
         var exception = Assert.Throws<DomainException>(() => stock.RemoveStock(quantity));
 
-        Assert.Equal("Not enough available stock to reserve.", exception.Message);
+        Assert.Equal("Quantity cannot be lower than reserved quantity.", exception.Message);
 
         Assert.Equal(10, stock.Quantity);
         Assert.Equal(reserved, stock.ReservedQuantity);
@@ -119,11 +119,11 @@ public class StockTests
     [Theory]
     [InlineData("SetQuantity", "Quantity cannot be negative.")]
     [InlineData("AddStock", "Quantity to add cannot be negative.")]
-    [InlineData("RemoveStock", "Quantity to reserve cannot be negative.")]
+    [InlineData("RemoveStock", "Quantity cannot be negative.")]
     public void ChangeQuantity_NegativeQuantity_ThrowsWithoutChangingStock(string operation, string expectedMessage)
     {
         var stock = CreateStock();
-        stock.RemoveStock(3);
+        SetReservedQuantity(stock, 3);
         var version = stock.Version;
         Action change = operation switch
         {
@@ -145,7 +145,7 @@ public class StockTests
     public void SetQuantity_WithReservations_PreservesReservations()
     {
         var stock = CreateStock();
-        stock.RemoveStock(3);
+        SetReservedQuantity(stock, 3);
 
         stock.SetQuantity(15);
 
@@ -165,6 +165,61 @@ public class StockTests
         Assert.NotEqual(Guid.Empty, stock.Version);
         Assert.NotEqual(version, stock.Version);
     }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public void SetQuantity_BelowReservedQuantity_ThrowsWithoutChangingStock(int quantity)
+    {
+        var stock = CreateStock();
+        SetReservedQuantity(stock, 3);
+        var version = stock.Version;
+
+        var exception = Assert.Throws<DomainException>(() => stock.SetQuantity(quantity));
+
+        Assert.Equal("Quantity cannot be lower than reserved quantity.", exception.Message);
+        Assert.Equal(10, stock.Quantity);
+        Assert.Equal(3, stock.ReservedQuantity);
+        Assert.Equal(7, stock.AvailableQuantity);
+        Assert.Equal(version, stock.Version);
+    }
+
+    [Fact]
+    public void SetQuantity_EqualToReservedQuantity_LeavesNoAvailableStock()
+    {
+        var stock = CreateStock();
+        SetReservedQuantity(stock, 3);
+        var version = stock.Version;
+
+        stock.SetQuantity(3);
+
+        Assert.Equal(3, stock.Quantity);
+        Assert.Equal(3, stock.ReservedQuantity);
+        Assert.Equal(0, stock.AvailableQuantity);
+        Assert.NotEqual(version, stock.Version);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(4)]
+    [InlineData(7)]
+    public void RemoveStock_WithReservations_PreservesReservedStock(int quantity)
+    {
+        var stock = CreateStock();
+        SetReservedQuantity(stock, 3);
+        var version = stock.Version;
+
+        stock.RemoveStock(quantity);
+
+        Assert.Equal(10 - quantity, stock.Quantity);
+        Assert.Equal(3, stock.ReservedQuantity);
+        Assert.Equal(7 - quantity, stock.AvailableQuantity);
+        Assert.NotEqual(version, stock.Version);
+    }
+
+    // Reservations have no public mutation method yet; seed state as EF would when loading stock.
+    private static void SetReservedQuantity(Stock stock, int quantity)
+        => typeof(Stock).GetProperty(nameof(Stock.ReservedQuantity))!.SetValue(stock, quantity);
 
     private static Stock CreateStock() => Stock.Create(Guid.NewGuid(), Guid.NewGuid(), 10);
 }

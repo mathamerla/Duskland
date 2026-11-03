@@ -26,12 +26,7 @@ internal class CreateStockHandler(InventoryDbContext Context, IGetProductHandler
     {
         var query = new GetProductQuery(productId, storeId);
 
-        var productExists = await ProductHandler.Handle(query, cancellationToken) is not null;
-        
-        if (!productExists)
-        {
-            throw new NotFoundException($"Product with id {productId} not found.");
-        }
+        await ProductHandler.Handle(query, cancellationToken);
     }
 
     private async Task SaveStock(Stock stock, CancellationToken cancellationToken)
