@@ -1,3 +1,5 @@
+using Duskland.BuildingBlocks.Application.Responses;
+using Duskland.BuildingBlocks.Application.Requests;
 using System.Net;
 using System.Net.Http.Json;
 using Duskland.Api.IntegrationTests.Infrastructure;

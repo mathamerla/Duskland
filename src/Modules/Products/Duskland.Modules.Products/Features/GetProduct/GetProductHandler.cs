@@ -1,8 +1,8 @@
+using Duskland.BuildingBlocks.Infrastructure.Exceptions;
 using Duskland.Modules.Products.Contracts.Features.GetProduct;
 using Duskland.Modules.Products.Contracts.Features.GetProduct.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
-using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Duskland.Modules.Products.Features.GetProduct;

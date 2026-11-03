@@ -1,5 +1,5 @@
 using Duskland.Modules.Products.Domain;
-using Duskland.Modules.Products.Domain.Common;
+using Duskland.BuildingBlocks.Domain.Exceptions;
 
 namespace Duskland.Modules.Products.Tests;
 

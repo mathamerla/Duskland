@@ -2,8 +2,8 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
 
-namespace Duskland.Modules.Products.Helpers;
-
+namespace Duskland.BuildingBlocks.Application.Helpers;
+    
 public static class CursorHelper<T> where T : class
 {
 

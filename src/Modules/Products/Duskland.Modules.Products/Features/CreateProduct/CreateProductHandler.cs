@@ -1,8 +1,8 @@
+using Duskland.BuildingBlocks.Infrastructure.Exceptions;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct;
 using Duskland.Modules.Products.Contracts.Features.CreateProduct.Command;
 using Duskland.Modules.Products.Domain;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
-using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
 using EntityFramework.Exceptions.Common;
 
 namespace Duskland.Modules.Products.Features.CreateProduct;

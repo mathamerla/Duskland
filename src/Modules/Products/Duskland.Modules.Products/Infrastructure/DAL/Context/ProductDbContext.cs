@@ -1,5 +1,5 @@
 using Duskland.Modules.Products.Domain;
-using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
+using Duskland.BuildingBlocks.Infrastructure.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace Duskland.Modules.Products.Extensions;
+namespace Duskland.BuildingBlocks.Application.Extensions;
 
 public static class StringExtensions
 {

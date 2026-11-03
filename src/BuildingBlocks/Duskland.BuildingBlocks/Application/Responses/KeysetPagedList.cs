@@ -1,6 +1,6 @@
 using System;
 
-namespace Duskland.Modules.Products.Contracts.Features.GetProductsKeysetPagination.Dtos;
+namespace Duskland.BuildingBlocks.Application.Responses;
 
 public record KeysetPagedList<T>(int PageSize, string NextCursor, IEnumerable<T> Items)
 {

@@ -1,7 +1,9 @@
+using Duskland.BuildingBlocks.Application.Extensions;
+using Duskland.BuildingBlocks.Application.Responses;
+using Duskland.BuildingBlocks.Application.Requests;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
 using Duskland.Modules.Products.Contracts.Features.GetProducts.Queries;
 using Duskland.Modules.Products.Domain;
-using Duskland.Modules.Products.Extensions;
 using Duskland.Modules.Products.Features.GetProducts.Validators;
 using Duskland.Modules.Products.Infrastructure.DAL.Context;
 using Microsoft.EntityFrameworkCore;

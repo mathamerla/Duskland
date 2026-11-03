@@ -1,5 +1,5 @@
 using System;
-using Duskland.Modules.Products.Infrastructure.DAL.Exceptions;
+using Duskland.BuildingBlocks.Infrastructure.Exceptions;
 using Microsoft.Net.Http.Headers;
 
 namespace Duskland.Api.Extensions;

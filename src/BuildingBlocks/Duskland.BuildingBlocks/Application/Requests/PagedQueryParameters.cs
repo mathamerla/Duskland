@@ -1,6 +1,5 @@
-using Duskland.Modules.Products.Contracts.Common;
-
-namespace Duskland.Modules.Products.Contracts.Features.GetProducts.Dtos;
+using Duskland.BuildingBlocks.Application.Exceptions;
+namespace Duskland.BuildingBlocks.Application.Requests;
 
 public enum Direction
 {
