@@ -33,8 +33,6 @@ public static class InventoryEndpoints
              .WithName("AddStock")
              .Produces(StatusCodes.Status201Created)
              .ProducesProblem(StatusCodes.Status400BadRequest)
-             .ProducesProblem(StatusCodes.Status412PreconditionFailed)
-             .ProducesProblem(StatusCodes.Status428PreconditionRequired)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
         // group.MapPost("/{productId}/add/", CreateProduct)
@@ -77,7 +75,7 @@ public static class InventoryEndpoints
     private static async Task<IResult> AddStock(Guid storeId, Guid productId, AddStockRequest request, IAddStockHandler handler, HttpContext context, CancellationToken cancellationToken)
     {
         var command = new AddStockCommand(storeId, productId, request.StockToAdd);
-        
+
         await handler.Handle(command, cancellationToken);
 
         return Results.Created($"/api/stores/{storeId}/inventory/{productId}", (object?)null);
