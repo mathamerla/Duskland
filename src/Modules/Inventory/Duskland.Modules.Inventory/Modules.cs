@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Duskland.Modules.Inventory.Features.GetStock;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock;
+using Duskland.Modules.Inventory.Features.AddStock;
+using Duskland.Modules.Inventory.Contracts.Features.AddStock;
 
 namespace Duskland.Modules.Inventory;
 
@@ -21,6 +23,7 @@ public static class InventoryModules
 
         services.AddScoped<ICreateStockHandler, CreateStockHandler>();
         services.AddScoped<IGetStockHandler, GetStockHandler>();
+        services.AddScoped<IAddStockHandler, AddStockHandler>();
 
         return services;
     }
