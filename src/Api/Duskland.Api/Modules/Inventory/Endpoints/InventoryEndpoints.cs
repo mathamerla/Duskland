@@ -8,6 +8,8 @@ using Duskland.Modules.Inventory.Contracts.Features.CreateStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock.Dtos;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock.Queries;
+using Duskland.Modules.Inventory.Contracts.Features.RemoveStock;
+using Duskland.Modules.Inventory.Contracts.Features.RemoveStock.Command;
 
 namespace Duskland.Api.Modules.Inventory.Endpoints;
 
@@ -35,12 +37,11 @@ public static class InventoryEndpoints
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
-        // group.MapPost("/{productId}/add/", CreateProduct)
-        //      .WithName("RemoveStock")
-        //      .Produces(StatusCodes.Status201Created)
-        //      .ProducesProblem(StatusCodes.Status400BadRequest)
-        //      .ProducesProblem(StatusCodes.Status409Conflict); 
-
+        group.MapPost("/{productId}/remove/", RemoveStock)
+             .WithName("RemoveStock")
+             .Produces(StatusCodes.Status204NoContent)
+             .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status404NotFound);
 
         // group.MapPut("/{productId}/quantity", PatchProduct)
         //      .WithName("SetQuantity")
@@ -75,6 +76,15 @@ public static class InventoryEndpoints
     private static async Task<IResult> AddStock(Guid storeId, Guid productId, AddStockRequest request, IAddStockHandler handler, HttpContext context, CancellationToken cancellationToken)
     {
         var command = new AddStockCommand(storeId, productId, request.StockToAdd);
+
+        await handler.Handle(command, cancellationToken);
+
+        return Results.NoContent();
+    }
+
+    private static async Task<IResult> RemoveStock(Guid storeId, Guid productId, RemoveStockRequest request, IRemoveStockHandler handler, CancellationToken cancellationToken)
+    {
+        var command = new RemoveStockQuery(storeId, productId, request.StockToRemove);
 
         await handler.Handle(command, cancellationToken);
 
