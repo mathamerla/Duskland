@@ -4,6 +4,8 @@ using Duskland.Modules.Inventory.Features.CreateStock;
 using EntityFramework.Exceptions.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Duskland.Modules.Inventory.Features.GetStock;
+using Duskland.Modules.Inventory.Contracts.Features.GetStock;
 
 namespace Duskland.Modules.Inventory;
 
@@ -18,6 +20,7 @@ public static class InventoryModules
         ); 
 
         services.AddScoped<ICreateStockHandler, CreateStockHandler>();
+        services.AddScoped<IGetStockHandler, GetStockHandler>();
 
         return services;
     }

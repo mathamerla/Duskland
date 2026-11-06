@@ -1,7 +1,11 @@
 using System;
+using Duskland.Api.Extensions;
 using Duskland.Api.Modules.Inventory.Requests;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock.Command;
+using Duskland.Modules.Inventory.Contracts.Features.GetStock;
+using Duskland.Modules.Inventory.Contracts.Features.GetStock.Dtos;
+using Duskland.Modules.Inventory.Contracts.Features.GetStock.Queries;
 
 namespace Duskland.Api.Modules.Inventory.Endpoints;
 
@@ -18,10 +22,10 @@ public static class InventoryEndpoints
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status409Conflict); 
 
-        // group.MapGet("/{productId}/", GetProduct)
-        //      .WithName("GetStock")
-        //      .Produces<ProductDto>(StatusCodes.Status200OK)
-        //      .ProducesProblem(StatusCodes.Status404NotFound);
+        group.MapGet("/{productId}/", GetStock)
+             .WithName("GetStock")
+             .Produces<StockDto>(StatusCodes.Status200OK)
+             .ProducesProblem(StatusCodes.Status404NotFound);
 
         // group.MapPost("/{productId}/add/", CreateProduct)
         //      .WithName("AddStock")
@@ -47,11 +51,22 @@ public static class InventoryEndpoints
         return app;
     }
 
-        private static async Task<IResult> CreateStock(Guid storeId, Guid productId, CreateStockRequest request, ICreateStockHandler handler, CancellationToken cancellationToken)
+    private static async Task<IResult> CreateStock(Guid storeId, Guid productId, CreateStockRequest request, ICreateStockHandler handler, CancellationToken cancellationToken)
     {
         var command = new CreateStockCommand(storeId, productId, request.Quantity);
         await handler.Handle(command, cancellationToken);
 
         return Results.Created($"/api/stores/{storeId}/inventory/{productId}", (object?)null);
+    }
+
+     private static async Task<StockDto> GetStock(Guid storeId, Guid productId, IGetStockHandler handler, HttpContext context, CancellationToken token)
+    {
+        var query = new GetStockQuery(storeId, productId);
+
+        var result = await handler.Handle(query, token);
+
+        context.AddETagToResponse(result.Version);
+
+        return result.Data;
     }
 }
