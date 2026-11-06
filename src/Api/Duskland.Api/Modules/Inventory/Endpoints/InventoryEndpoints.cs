@@ -1,6 +1,8 @@
 using System;
 using Duskland.Api.Extensions;
 using Duskland.Api.Modules.Inventory.Requests;
+using Duskland.Modules.Inventory.Contracts.Features.AddStock;
+using Duskland.Modules.Inventory.Contracts.Features.AddStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock;
@@ -27,11 +29,11 @@ public static class InventoryEndpoints
              .Produces<StockDto>(StatusCodes.Status200OK)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
-        // group.MapPost("/{productId}/add/", CreateProduct)
-        //      .WithName("AddStock")
-        //      .Produces(StatusCodes.Status201Created)
-        //      .ProducesProblem(StatusCodes.Status400BadRequest)
-        //      .ProducesProblem(StatusCodes.Status409Conflict); 
+        group.MapPost("/{productId}/add/", AddStock)
+             .WithName("AddStock")
+             .Produces(StatusCodes.Status204NoContent)
+             .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status404NotFound);
 
         // group.MapPost("/{productId}/add/", CreateProduct)
         //      .WithName("RemoveStock")
@@ -68,5 +70,14 @@ public static class InventoryEndpoints
         context.AddETagToResponse(result.Version);
 
         return result.Data;
+    }
+
+    private static async Task<IResult> AddStock(Guid storeId, Guid productId, AddStockRequest request, IAddStockHandler handler, HttpContext context, CancellationToken cancellationToken)
+    {
+        var command = new AddStockCommand(storeId, productId, request.StockToAdd);
+
+        await handler.Handle(command, cancellationToken);
+
+        return Results.NoContent();
     }
 }
