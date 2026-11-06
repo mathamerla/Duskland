@@ -41,23 +41,16 @@ public class AddStockTests : IClassFixture<DusklandWebApplicationFactory>
     }
 
     [Fact]
-    public async Task AddStock_MaxIntToEmptyStock_Returns204AndPersistsMaxInt()
+    public async Task AddStock_MaxIntExceedingLimit_Returns400WithoutChanges()
     {
-        var stock = Stock.Create(_storeId, Guid.NewGuid(), 0);
+        var stock = Stock.Create(_storeId, Guid.NewGuid(), 10);
         await _factory.InsertIntoTable([stock]);
 
         using var response = await AddAsync(_storeId, stock.ProductId, int.MaxValue);
 
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        var saved = Assert.Single(await _factory.GetTable<Stock>());
-        Assert.Equal(stock.Id, saved.Id);
-        Assert.Equal(stock.StoreId, saved.StoreId);
-        Assert.Equal(stock.ProductId, saved.ProductId);
-        Assert.Equal(int.MaxValue, saved.Quantity);
-        Assert.Equal(0, saved.ReservedQuantity);
-        Assert.Equal(int.MaxValue, saved.AvailableQuantity);
-        Assert.NotEqual(Guid.Empty, saved.Version);
-        Assert.NotEqual(stock.Version, saved.Version);
+        await AssertProblemAsync(response, HttpStatusCode.BadRequest,
+            $"Adding {int.MaxValue} to stock for product {stock.ProductId} in store {_storeId} would exceed the maximum allowed quantity.");
+        Assert.Equivalent(stock, Assert.Single(await _factory.GetTable<Stock>()));
     }
 
     [Fact]

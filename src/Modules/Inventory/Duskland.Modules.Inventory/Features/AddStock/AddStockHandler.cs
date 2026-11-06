@@ -21,6 +21,11 @@ internal class AddStockHandler(InventoryDbContext Context) : IAddStockHandler
 
         if (result == 0)
         {
+            if (await StockExists(command.StoreId, command.ProductId, cancellationToken))
+            {
+                throw new DomainException($"Adding {command.StockToAdd} to stock for product {command.ProductId} in store {command.StoreId} would exceed the maximum allowed quantity.");
+            }
+
             throw new NotFoundException($"Stock for product {command.ProductId} in store {command.StoreId} does not exist.");
         }
     }
@@ -38,5 +43,11 @@ internal class AddStockHandler(InventoryDbContext Context) : IAddStockHandler
             .ExecuteUpdateAsync(c => c
                 .SetProperty(c => c.Quantity, c => c.Quantity + stockToAdd)
                 .SetProperty(c => c.Version, c => Guid.NewGuid()), cancellationToken);
+    }
+
+    private Task<bool> StockExists(Guid storeId, Guid productId, CancellationToken cancellationToken)
+    {
+        return Context.Stocks
+            .AnyAsync(c => c.ProductId == productId && c.StoreId == storeId, cancellationToken);
     }
 }
