@@ -12,17 +12,17 @@ internal class AddStockHandler(InventoryDbContext Context) : IAddStockHandler
 {
     public async Task Handle(AddStockCommand command, CancellationToken cancellationToken)
     {
-        if (!await StockExists(command.StoreId, command.ProductId, cancellationToken))
-        {
-            throw new NotFoundException($"Stock for product {command.ProductId} in store {command.StoreId} does not exist.");
-        }
-
         if (!IsValidStockToAdd(command.StockToAdd))
         {
             throw new DomainException("Stock to add must be greater than zero.");
         }
 
-        await UpdateStockQuantity(command.StoreId, command.ProductId, command.StockToAdd, cancellationToken);
+        var result = await UpdateStockQuantity(command.StoreId, command.ProductId, command.StockToAdd, cancellationToken);
+
+        if (result == 0)
+        {
+            throw new NotFoundException($"Stock for product {command.ProductId} in store {command.StoreId} does not exist.");
+        }
     }
 
     private static bool IsValidStockToAdd(int stockToAdd)
@@ -30,15 +30,11 @@ internal class AddStockHandler(InventoryDbContext Context) : IAddStockHandler
         return stockToAdd > 0;
     }
 
-    private Task<bool> StockExists(Guid storeId, Guid productId, CancellationToken cancellationToken)
-    {
-        return Context.Stocks.AnyAsync(c => c.ProductId == productId && c.StoreId == storeId, cancellationToken);
-    }
-
     private Task<int> UpdateStockQuantity(Guid storeId, Guid productId, int stockToAdd, CancellationToken cancellationToken)
     {
         return Context.Stocks
             .Where(c => c.ProductId == productId && c.StoreId == storeId)
+            .Where(c => c.Quantity <= int.MaxValue - stockToAdd)
             .ExecuteUpdateAsync(c => c
                 .SetProperty(c => c.Quantity, c => c.Quantity + stockToAdd)
                 .SetProperty(c => c.Version, c => Guid.NewGuid()), cancellationToken);

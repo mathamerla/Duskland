@@ -31,7 +31,7 @@ public static class InventoryEndpoints
 
         group.MapPost("/{productId}/add/", AddStock)
              .WithName("AddStock")
-             .Produces(StatusCodes.Status201Created)
+             .Produces(StatusCodes.Status204NoContent)
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
@@ -78,6 +78,6 @@ public static class InventoryEndpoints
 
         await handler.Handle(command, cancellationToken);
 
-        return Results.Created($"/api/stores/{storeId}/inventory/{productId}", (object?)null);
+        return Results.NoContent();
     }
 }

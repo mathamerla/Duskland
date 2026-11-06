@@ -23,15 +23,14 @@ public class AddStockTests : IClassFixture<DusklandWebApplicationFactory>
 
     [Theory]
     [InlineData(5)]
-    public async Task AddStock_ValidQuantity_Returns201AndPreservesReservations(int quantity)
+    public async Task AddStock_ValidQuantity_Returns204AndPreservesReservations(int quantity)
     {
         var stock = Stock.Create(_storeId, Guid.NewGuid(), 10);
         await _factory.InsertIntoTable([stock]);
 
         using var response = await AddAsync(_storeId, stock.ProductId, quantity);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.Equal($"/api/stores/{_storeId}/inventory/{stock.ProductId}", response.Headers.Location?.OriginalString);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         var saved = Assert.Single(await _factory.GetTable<Stock>());
         Assert.Equal(stock.Id, saved.Id);
         Assert.Equal(stock.StoreId, saved.StoreId);
@@ -39,13 +38,26 @@ public class AddStockTests : IClassFixture<DusklandWebApplicationFactory>
         Assert.Equal(10 + quantity, saved.Quantity);
         Assert.NotEqual(Guid.Empty, saved.Version);
         Assert.NotEqual(stock.Version, saved.Version);
+    }
 
-        using var getResponse = await _httpClient.GetAsync(response.Headers.Location);
-        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
-        var result = await getResponse.Content.ReadFromJsonAsync<StockDto>();
-        Assert.Equal(new StockDto(saved.Id, saved.StoreId, saved.ProductId,
-            saved.Quantity, saved.ReservedQuantity, saved.AvailableQuantity), result);
-        Assert.Equal($"\"{saved.Version}\"", getResponse.Headers.ETag?.Tag);
+    [Fact]
+    public async Task AddStock_MaxIntToEmptyStock_Returns204AndPersistsMaxInt()
+    {
+        var stock = Stock.Create(_storeId, Guid.NewGuid(), 0);
+        await _factory.InsertIntoTable([stock]);
+
+        using var response = await AddAsync(_storeId, stock.ProductId, int.MaxValue);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        var saved = Assert.Single(await _factory.GetTable<Stock>());
+        Assert.Equal(stock.Id, saved.Id);
+        Assert.Equal(stock.StoreId, saved.StoreId);
+        Assert.Equal(stock.ProductId, saved.ProductId);
+        Assert.Equal(int.MaxValue, saved.Quantity);
+        Assert.Equal(0, saved.ReservedQuantity);
+        Assert.Equal(int.MaxValue, saved.AvailableQuantity);
+        Assert.NotEqual(Guid.Empty, saved.Version);
+        Assert.NotEqual(stock.Version, saved.Version);
     }
 
     [Fact]
@@ -58,7 +70,7 @@ public class AddStockTests : IClassFixture<DusklandWebApplicationFactory>
 
         using var response = await AddAsync(_storeId, stock.ProductId, 5);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         var stocks = await _factory.GetTable<Stock>();
         Assert.Equal(3, stocks.Count);
         Assert.Equal(15, Assert.Single(stocks, item => item.Id == stock.Id).Quantity);
@@ -98,6 +110,7 @@ public class AddStockTests : IClassFixture<DusklandWebApplicationFactory>
     [Theory]
     [InlineData(-1)]
     [InlineData(-11)]
+    [InlineData(0)]
     public async Task AddStock_NegativeQuantity_Returns400WithoutChanges(int quantity)
     {
         var stock = Stock.Create(_storeId, Guid.NewGuid(), 10);
@@ -120,7 +133,7 @@ public class AddStockTests : IClassFixture<DusklandWebApplicationFactory>
             AddAsync(_storeId, stock.ProductId, 7));
         try
         {
-            Assert.All(responses, response => Assert.Equal(HttpStatusCode.Created, response.StatusCode));
+            Assert.All(responses, response => Assert.Equal(HttpStatusCode.NoContent, response.StatusCode));
             var saved = Assert.Single(await _factory.GetTable<Stock>());
             Assert.Equal(22, saved.Quantity);
             Assert.Equal(0, saved.ReservedQuantity);
