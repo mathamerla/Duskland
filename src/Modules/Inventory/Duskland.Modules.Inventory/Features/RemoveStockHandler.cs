@@ -39,8 +39,7 @@ internal class RemoveStockHandler(InventoryDbContext Context) : IRemoveStockHand
     {
         return Context.Stocks
             .Where(c => c.ProductId == productId && c.StoreId == storeId)
-            .Where(c => c.Quantity - stockToRemove >= 0)
-            .Where(c => c.Quantity - stockToRemove >= c.ReservedQuantity)
+            .Where(c => c.Quantity - c.ReservedQuantity >= stockToRemove)
             .ExecuteUpdateAsync(c => c
                 .SetProperty(c => c.Quantity, c => c.Quantity - stockToRemove)
                 .SetProperty(c => c.Version, c => Guid.NewGuid()), cancellationToken);
