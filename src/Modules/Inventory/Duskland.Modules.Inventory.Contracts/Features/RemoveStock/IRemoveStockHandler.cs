@@ -5,5 +5,5 @@ namespace Duskland.Modules.Inventory.Contracts.Features.RemoveStock;
 
 public interface IRemoveStockHandler
 {
-    Task Handle(RemoveStockQuery command, CancellationToken cancellationToken);
+    Task Handle(RemoveStockCommand command, CancellationToken cancellationToken);
 }

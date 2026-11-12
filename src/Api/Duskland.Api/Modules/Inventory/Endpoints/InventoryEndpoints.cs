@@ -84,7 +84,7 @@ public static class InventoryEndpoints
 
     private static async Task<IResult> RemoveStock(Guid storeId, Guid productId, RemoveStockRequest request, IRemoveStockHandler handler, CancellationToken cancellationToken)
     {
-        var command = new RemoveStockQuery(storeId, productId, request.StockToRemove);
+        var command = new RemoveStockCommand(storeId, productId, request.StockToRemove);
 
         await handler.Handle(command, cancellationToken);
 
