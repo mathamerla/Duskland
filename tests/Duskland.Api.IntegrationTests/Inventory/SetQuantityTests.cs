@@ -154,6 +154,33 @@ public class SetQuantityTests : IClassFixture<DusklandWebApplicationFactory>
         await AssertUnchangedAsync(firstUpdate);
     }
 
+    [Theory]
+    [InlineData(0, 5)]
+    [InlineData(3, 7)]
+    public async Task SetQuantity_OldETagAfterAddingStock_Returns412AndPreservesAddedStock(int reserved, int quantityToAdd)
+    {
+        var stock = await SeedStockAsync(reserved);
+        using var getResponse = await _httpClient.GetAsync($"/api/stores/{_storeId}/inventory/{stock.ProductId}");
+        Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
+        var oldETag = getResponse.Headers.ETag?.Tag;
+        Assert.NotNull(oldETag);
+
+        using var addResponse = await _httpClient.PostAsJsonAsync(
+            $"/api/stores/{_storeId}/inventory/{stock.ProductId}/add/",
+            new AddStockRequest(quantityToAdd));
+        Assert.Equal(HttpStatusCode.NoContent, addResponse.StatusCode);
+        var addedStock = Assert.Single(await _factory.GetTable<Stock>());
+        Assert.Equal(10 + quantityToAdd, addedStock.Quantity);
+        Assert.Equal(reserved, addedStock.ReservedQuantity);
+        Assert.Equal(10 + quantityToAdd - reserved, addedStock.AvailableQuantity);
+        Assert.NotEqual(stock.Version, addedStock.Version);
+
+        using var response = await PatchAsync(stock, 5, oldETag);
+
+        await AssertVersionConflictAsync(response);
+        await AssertUnchangedAsync(addedStock);
+    }
+
     [Fact]
     public async Task SetQuantity_ConcurrentRequestsWithSameVersion_OnlyOneSucceeds()
     {
