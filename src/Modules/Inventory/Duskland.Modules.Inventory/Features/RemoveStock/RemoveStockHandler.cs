@@ -6,11 +6,11 @@ using Duskland.Modules.Inventory.Contracts.Features.RemoveStock.Command;
 using Duskland.Modules.Inventory.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace Duskland.Modules.Inventory.Features;
+namespace Duskland.Modules.Inventory.Features.RemoveStock;
 
 internal class RemoveStockHandler(InventoryDbContext Context) : IRemoveStockHandler
 {
-    public async Task Handle(RemoveStockQuery command, CancellationToken cancellationToken)
+    public async Task Handle(RemoveStockCommand command, CancellationToken cancellationToken)
     {
         if (!IsValidStockToRemove(command.StockToRemove))
         {

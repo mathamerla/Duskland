@@ -8,8 +8,10 @@ using Duskland.Modules.Inventory.Features.GetStock;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock;
 using Duskland.Modules.Inventory.Features.AddStock;
 using Duskland.Modules.Inventory.Contracts.Features.AddStock;
-using Duskland.Modules.Inventory.Features;
 using Duskland.Modules.Inventory.Contracts.Features.RemoveStock;
+using Duskland.Modules.Inventory.Features.RemoveStock;
+using Duskland.Modules.Inventory.Contracts.Features.SetQuantity;
+using Duskland.Modules.Inventory.Features.SetQuantity;
 
 namespace Duskland.Modules.Inventory;
 
@@ -27,6 +29,7 @@ public static class InventoryModules
         services.AddScoped<IGetStockHandler, GetStockHandler>();
         services.AddScoped<IAddStockHandler, AddStockHandler>();
         services.AddScoped<IRemoveStockHandler, RemoveStockHandler>();
+        services.AddScoped<ISetQuantityHandler, SetQuantityHandler>();
 
         return services;
     }

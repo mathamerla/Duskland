@@ -10,6 +10,9 @@ using Duskland.Modules.Inventory.Contracts.Features.GetStock.Dtos;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock.Queries;
 using Duskland.Modules.Inventory.Contracts.Features.RemoveStock;
 using Duskland.Modules.Inventory.Contracts.Features.RemoveStock.Command;
+using Duskland.Modules.Inventory.Contracts.Features.SetQuantity;
+using Duskland.Modules.Inventory.Contracts.Features.SetQuantity.Command;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Duskland.Api.Modules.Inventory.Endpoints;
 
@@ -43,13 +46,13 @@ public static class InventoryEndpoints
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status404NotFound);
 
-        // group.MapPut("/{productId}/quantity", PatchProduct)
-        //      .WithName("SetQuantity")
-        //      .Produces<NoContentResult>(StatusCodes.Status204NoContent)
-        //      .ProducesProblem(StatusCodes.Status400BadRequest)
-        //      .ProducesProblem(StatusCodes.Status412PreconditionFailed)
-        //      .ProducesProblem(StatusCodes.Status428PreconditionRequired)
-        //      .ProducesProblem(StatusCodes.Status404NotFound);
+        group.MapPatch("/{productId}/quantity", SetQuantity)
+             .WithName("SetQuantity")
+             .Produces<NoContentResult>(StatusCodes.Status204NoContent)
+             .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status412PreconditionFailed)
+             .ProducesProblem(StatusCodes.Status428PreconditionRequired)
+             .ProducesProblem(StatusCodes.Status404NotFound);
 
         return app;
     }
@@ -84,9 +87,20 @@ public static class InventoryEndpoints
 
     private static async Task<IResult> RemoveStock(Guid storeId, Guid productId, RemoveStockRequest request, IRemoveStockHandler handler, CancellationToken cancellationToken)
     {
-        var command = new RemoveStockQuery(storeId, productId, request.StockToRemove);
+        var command = new RemoveStockCommand(storeId, productId, request.StockToRemove);
 
         await handler.Handle(command, cancellationToken);
+
+        return Results.NoContent();
+    }
+
+     private static async Task<IResult> SetQuantity(Guid storeId, Guid productId, SetQuantityRequest request, ISetQuantityHandler handler, HttpContext context, CancellationToken token)
+    {
+        var version = context.GetIfMatchStamp();
+
+        var command = new SetQuantityCommand(storeId, productId, request.Quantity, version);
+
+        await handler.Handle(command, token);
 
         return Results.NoContent();
     }
