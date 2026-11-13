@@ -62,6 +62,7 @@ public static class InventoryEndpoints
              .Produces(StatusCodes.Status200OK)
              .Produces(StatusCodes.Status201Created)
              .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status404NotFound)
              .ProducesProblem(StatusCodes.Status409Conflict); 
 
         return app;
