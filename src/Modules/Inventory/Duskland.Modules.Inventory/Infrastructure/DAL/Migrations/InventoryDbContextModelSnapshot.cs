@@ -53,6 +53,69 @@ namespace Duskland.Modules.Inventory.Infrastructure.DAL.Migrations
 
                     b.ToTable("Stocks", "inventory");
                 });
+
+            modelBuilder.Entity("Duskland.Modules.Inventory.Domain.StockReservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("StockId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("StoreId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StockId");
+
+                    b.HasIndex("Status", "ExpirationDate")
+                        .HasDatabaseName("IX_StockReservations_Status_ExpirationDate");
+
+                    b.HasIndex("StoreId", "ProductId", "OrderId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_StockReservations_StoreId_ProductId_OrderId");
+
+                    b.ToTable("StockReservations", "inventory", t =>
+                        {
+                            t.HasCheckConstraint("CK_StockReservations_Quantity", "\"Quantity\" > 0");
+                        });
+                });
+
+            modelBuilder.Entity("Duskland.Modules.Inventory.Domain.StockReservation", b =>
+                {
+                    b.HasOne("Duskland.Modules.Inventory.Domain.Stock", "Stock")
+                        .WithMany("Reservations")
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Stock");
+                });
+
+            modelBuilder.Entity("Duskland.Modules.Inventory.Domain.Stock", b =>
+                {
+                    b.Navigation("Reservations");
+                });
 #pragma warning restore 612, 618
         }
     }
