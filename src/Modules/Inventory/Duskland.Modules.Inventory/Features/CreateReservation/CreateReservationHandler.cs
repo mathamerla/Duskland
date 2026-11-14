@@ -4,7 +4,6 @@ using Duskland.Modules.Inventory.Contracts.Features.CreateReservation;
 using Duskland.Modules.Inventory.Contracts.Features.CreateReservation.Command;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock.Dtos;
 using Duskland.Modules.Inventory.Domain;
-using Duskland.Modules.Inventory.Domain.Enums;
 using Duskland.Modules.Inventory.Infrastructure.Context;
 using EntityFramework.Exceptions.Common;
 using Microsoft.EntityFrameworkCore;
@@ -15,48 +14,78 @@ internal class CreateReservationHandler(InventoryDbContext Context) : ICreateRes
 {
     public async Task<CreateReservationDto> Handle(CreateReservationCommand command, CancellationToken cancellationToken)
     {
-        var reservationId = await ExistingReservationId(command, cancellationToken);
+        var reservationId = await ReservationIdempotencyId(command, cancellationToken);
 
         if (reservationId is not null)
         {
             return new CreateReservationDto(reservationId.Value, false);
         }
 
+        var reservation = await CreateStockReservation(command, cancellationToken);
+
+        var isTransactionSuccess = await RunTransaction(command, reservation, cancellationToken);
+
+        return await Response(command, reservation, isTransactionSuccess, cancellationToken);
+    }
+
+    private async Task<CreateReservationDto> Response(CreateReservationCommand command, StockReservation reservation, bool isSuccess, CancellationToken cancellationToken)
+    {
+        if (isSuccess)
+        {
+            return new CreateReservationDto(reservation.Id, true);
+        }
+
+        var existingReservationId = await ReservationIdempotencyId(command, cancellationToken);
+
+        if (existingReservationId is not null)
+        {
+            return new CreateReservationDto(existingReservationId.Value, false);
+        }
+
+        throw new DomainException("Not enough stock available to make reservation");
+    }
+
+    private async Task<bool> RunTransaction(CreateReservationCommand command, StockReservation reservation, CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var transaction = await Context.Database.BeginTransactionAsync(cancellationToken);
+            
+            var updatedStocks = await UpdateStock(command.Quantity, command.ProductId, command.StoreId, cancellationToken);
+
+            if (updatedStocks == 0)
+            {
+                return false;
+            }
+
+            await Context.StockReservations.AddAsync(reservation, cancellationToken);
+            await Context.SaveChangesAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (UniqueConstraintException ex)
+        {
+            if (ex.ConstraintName == "IX_StockReservations_StoreId_ProductId_OrderId")
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private async Task<StockReservation> CreateStockReservation(CreateReservationCommand command, CancellationToken cancellationToken)
+    {
         var stock = await Stock(command.ProductId, command.StoreId, cancellationToken); 
 
-        var expirationDate = ExpirationDate();
-
-        var reservation = StockReservation.Create(
+        return StockReservation.Create(
             command.ProductId, 
             command.StoreId, 
             command.OrderId, 
             stock, 
             command.Quantity, 
-            expirationDate
+            ExpirationDate()
         );
-
-        using var transaction = await Context.Database.BeginTransactionAsync(cancellationToken);
-        
-        var updatedStocks = await UpdateStock(command.Quantity, command.ProductId, command.StoreId, cancellationToken);
-
-        if (updatedStocks == 0)
-        {
-            var existingReservationId = await ExistingReservationId(command, cancellationToken);
-
-            if (existingReservationId is not null)
-            {
-                return new CreateReservationDto(existingReservationId.Value, false);
-            }
-
-            throw new DomainException("Not enough stock available to make reservation");
-        }
-
-        await Context.StockReservations.AddAsync(reservation, cancellationToken);
-        await SaveChanges(cancellationToken);
-
-        await transaction.CommitAsync(cancellationToken);
-
-        return new CreateReservationDto(reservation.Id, true);
     }
 
     private Task<StockReservation?> ExistingReservation(Guid storeId, Guid productId, Guid orderId, CancellationToken cancellationToken)
@@ -70,7 +99,7 @@ internal class CreateReservationHandler(InventoryDbContext Context) : ICreateRes
             cancellationToken);
     }
 
-    private async Task<Guid?> ExistingReservationId(CreateReservationCommand command, CancellationToken cancellationToken)
+    private async Task<Guid?> ReservationIdempotencyId(CreateReservationCommand command, CancellationToken cancellationToken)
     {
         var existingReservation = await ExistingReservation(command.StoreId, command.ProductId, command.OrderId, cancellationToken);
 
@@ -101,23 +130,6 @@ internal class CreateReservationHandler(InventoryDbContext Context) : ICreateRes
     {
         return await Context.Stocks.FirstOrDefaultAsync(c => c.ProductId == productId && c.StoreId == storeId, cancellationToken) ??
             throw new NotFoundException($"Stock for product {productId} and store {storeId} not found");        
-    }
-
-    private async Task SaveChanges(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await Context.SaveChangesAsync(cancellationToken);
-        }
-        catch (UniqueConstraintException ex)
-        {
-            if (ex.ConstraintName == "IX_StockReservations_StoreId_ProductId_OrderId")
-            {                
-                throw new ConflictException($"Reservation for this order id and product id already exists", ex);
-            }
-
-            throw;
-        }
     }
 
     private static DateTime ExpirationDate()

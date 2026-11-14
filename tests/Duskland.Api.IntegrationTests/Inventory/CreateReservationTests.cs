@@ -189,11 +189,7 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
         {
             Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
             var duplicate = Assert.Single(responses, response => response.StatusCode != HttpStatusCode.Created);
-            // A duplicate can be observed before the update or rejected by the unique constraint.
-            if (quantity == 10)
-                Assert.Equal(HttpStatusCode.OK, duplicate.StatusCode);
-            else
-                Assert.Contains(duplicate.StatusCode, new[] { HttpStatusCode.OK, HttpStatusCode.Conflict });
+            Assert.Equal(HttpStatusCode.OK, duplicate.StatusCode);
 
             var reservation = Assert.Single(await _factory.GetTable<StockReservation>());
             Assert.Equal(orderId, reservation.OrderId);
@@ -202,6 +198,35 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
             Assert.Equal(stock.Quantity, saved.Quantity);
             Assert.Equal(quantity, saved.ReservedQuantity);
             Assert.Equal(stock.Quantity - quantity, saved.AvailableQuantity);
+        }
+        finally
+        {
+            foreach (var response in responses)
+                response.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task CreateReservation_ConcurrentRequestsForSameOrderWithDifferentQuantities_ReturnsConflictAndReservesOnlyWinningQuantity()
+    {
+        var stock = await SeedStockAsync();
+        var orderId = Guid.NewGuid();
+        var quantities = new[] { 3, 4 };
+
+        var responses = await Task.WhenAll(
+            CreateAsync(stock, orderId, quantities[0]),
+            CreateAsync(stock, orderId, quantities[1]));
+        try
+        {
+            var created = Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
+            Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Conflict);
+            var winningQuantity = quantities[Array.IndexOf(responses, created)];
+            var reservation = Assert.Single(await _factory.GetTable<StockReservation>());
+            Assert.Equal(orderId, reservation.OrderId);
+            Assert.Equal(winningQuantity, reservation.Quantity);
+            var saved = Assert.Single(await _factory.GetTable<Stock>());
+            Assert.Equal(winningQuantity, saved.ReservedQuantity);
+            Assert.Equal(stock.Quantity - winningQuantity, saved.AvailableQuantity);
         }
         finally
         {
