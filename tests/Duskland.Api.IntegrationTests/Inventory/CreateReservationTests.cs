@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Duskland.Api.IntegrationTests.Infrastructure;
 using Duskland.Api.Modules.Inventory.Requests;
 using Duskland.Modules.Inventory.Domain;
@@ -36,6 +37,7 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var reservation = Assert.Single(await _factory.GetTable<StockReservation>());
         Assert.NotEqual(Guid.Empty, reservation.Id);
+        await AssertReservationIdAsync(response, reservation.Id);
         Assert.Equal(stock.Id, reservation.StockId);
         Assert.Equal(stock.StoreId, reservation.StoreId);
         Assert.Equal(stock.ProductId, reservation.ProductId);
@@ -89,6 +91,10 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
         Assert.Equal(stock.Version, savedStock.Version);
         var saved = Assert.Single(await _factory.GetTable<StockReservation>());
         Assert.Equal(reservation.Id, saved.Id);
+        if (expectedStatus == HttpStatusCode.OK)
+        {
+            await AssertReservationIdAsync(response, reservation.Id);
+        }
         Assert.Equal(3, saved.Quantity);
         Assert.Equal(status, saved.Status);
         Assert.InRange(saved.ExpirationDate, reservation.ExpirationDate.AddTicks(-10), reservation.ExpirationDate.AddTicks(10));
@@ -142,6 +148,7 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
             await AssertBadRequestAsync(rejectedResponse, "Not enough stock available to make reservation");
 
             var reservation = Assert.Single(await _factory.GetTable<StockReservation>());
+            await AssertReservationIdAsync(successfulResponse, reservation.Id);
             Assert.Equal(orderIds[Array.IndexOf(responses, successfulResponse)], reservation.OrderId);
             Assert.Equal(stock.Id, reservation.StockId);
             Assert.Equal(stock.StoreId, reservation.StoreId);
@@ -192,6 +199,10 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
             Assert.Equal(HttpStatusCode.OK, duplicate.StatusCode);
 
             var reservation = Assert.Single(await _factory.GetTable<StockReservation>());
+            foreach (var response in responses)
+            {
+                await AssertReservationIdAsync(response, reservation.Id);
+            }
             Assert.Equal(orderId, reservation.OrderId);
             Assert.Equal(quantity, reservation.Quantity);
             var saved = Assert.Single(await _factory.GetTable<Stock>());
@@ -224,6 +235,7 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
             var reservation = Assert.Single(await _factory.GetTable<StockReservation>());
             Assert.Equal(orderId, reservation.OrderId);
             Assert.Equal(winningQuantity, reservation.Quantity);
+            await AssertReservationIdAsync(created, reservation.Id);
             var saved = Assert.Single(await _factory.GetTable<Stock>());
             Assert.Equal(winningQuantity, saved.ReservedQuantity);
             Assert.Equal(stock.Quantity - winningQuantity, saved.AvailableQuantity);
@@ -246,6 +258,12 @@ public class CreateReservationTests : IClassFixture<DusklandWebApplicationFactor
     private Task<HttpResponseMessage> CreateAsync(Stock stock, Guid orderId, int quantity)
         => _client.PostAsJsonAsync($"/api/stores/{stock.StoreId}/inventory/reservation?productId={stock.ProductId}",
             new CreateReservationRequest(orderId, quantity));
+
+    private static async Task AssertReservationIdAsync(HttpResponseMessage response, Guid expectedId)
+    {
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Equal(expectedId, body.GetProperty("reservationId").GetGuid());
+    }
 
     private static async Task AssertBadRequestAsync(HttpResponseMessage response, string detail)
     {

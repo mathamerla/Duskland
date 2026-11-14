@@ -69,6 +69,8 @@ internal class CreateReservationHandler(InventoryDbContext Context) : ICreateRes
             {
                 return false;
             }
+
+            throw;
         }
 
         return true;

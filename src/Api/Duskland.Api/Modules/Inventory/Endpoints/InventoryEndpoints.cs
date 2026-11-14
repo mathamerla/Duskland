@@ -124,9 +124,9 @@ public static class InventoryEndpoints
 
         if (result.Created)
         {
-            return Results.Created();
+            return Results.Created((string?)null, new { ReservationId = result.Id });
         }
 
-        return Results.Ok();
+        return Results.Ok(new { ReservationId = result.Id });
     }
 }
