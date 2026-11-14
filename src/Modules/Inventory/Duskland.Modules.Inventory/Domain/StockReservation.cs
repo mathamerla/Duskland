@@ -58,4 +58,9 @@ public class StockReservation
 
         ExpirationDate = expirationDate;
     }
+
+    public bool IsActive()
+    {
+        return Status == ReservationStatus.ACTIVE && ExpirationDate > DateTime.UtcNow;
+    }
 }

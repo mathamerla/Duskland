@@ -54,4 +54,27 @@ public class StockReservationTests
 
         Assert.Equal("Expiration date must be in the future", exception.Message);
     }
+    [Theory]
+    [InlineData(ReservationStatus.ACTIVE, false, true)]
+    [InlineData(ReservationStatus.ACTIVE, true, false)]
+    [InlineData(ReservationStatus.CONFIRMED, false, false)]
+    [InlineData(ReservationStatus.RELEASED, false, false)]
+    [InlineData(ReservationStatus.EXPIRED, false, false)]
+    [InlineData(ReservationStatus.CONFIRMED, true, false)]
+    [InlineData(ReservationStatus.RELEASED, true, false)]
+    [InlineData(ReservationStatus.EXPIRED, true, false)]
+    public void IsActive_ReturnsTrueOnlyForUnexpiredActiveReservation(
+        ReservationStatus status, bool expired, bool expected)
+    {
+        var stock = Stock.Create(Guid.NewGuid(), Guid.NewGuid(), 10);
+        var reservation = StockReservation.Create(stock.ProductId, stock.StoreId, Guid.NewGuid(),
+            stock, 1, DateTime.UtcNow.AddHours(1));
+        typeof(StockReservation).GetProperty(nameof(StockReservation.Status))!.SetValue(reservation, status);
+        // Model persisted reservations without waiting for real time to pass.
+        typeof(StockReservation).GetProperty(nameof(StockReservation.ExpirationDate))!
+            .SetValue(reservation, DateTime.UtcNow.AddHours(expired ? -1 : 1));
+
+        Assert.Equal(expected, reservation.IsActive());
+    }
+
 }
