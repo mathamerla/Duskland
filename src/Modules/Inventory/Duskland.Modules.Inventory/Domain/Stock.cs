@@ -28,6 +28,8 @@ public class Stock
 
     public Guid Version { get; private set; }
 
+    public ICollection<StockReservation> Reservations { get; private set; } = new List<StockReservation>();
+
     public int AvailableQuantity => Quantity - ReservedQuantity;
 
     public void SetQuantity(int quantity)

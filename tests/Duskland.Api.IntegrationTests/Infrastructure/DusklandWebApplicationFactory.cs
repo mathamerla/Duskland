@@ -40,7 +40,7 @@ public class DusklandWebApplicationFactory : WebApplicationFactory<Program>, IAs
     }
 
     private static DbContext GetContext<T>(IServiceProvider services) where T : class
-        => typeof(T) == typeof(Stock)
+        => (typeof(T) == typeof(Stock) || typeof(T) == typeof(StockReservation))
             ? services.GetRequiredService<InventoryDbContext>()
             : services.GetRequiredService<ProductDbContext>();
 
