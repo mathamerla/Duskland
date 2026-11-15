@@ -63,4 +63,19 @@ public class StockReservation
     {
         return Status == ReservationStatus.ACTIVE && ExpirationDate > DateTime.UtcNow;
     }
+
+    public bool IsExpired()
+    {
+        return Status == ReservationStatus.EXPIRED || Status == ReservationStatus.ACTIVE && ExpirationDate <= DateTime.UtcNow;
+    }
+
+    public bool IsReleased()
+    {
+        return Status == ReservationStatus.RELEASED;
+    }
+
+    public bool IsConfirmed()
+    {
+        return Status == ReservationStatus.CONFIRMED;
+    }
 }

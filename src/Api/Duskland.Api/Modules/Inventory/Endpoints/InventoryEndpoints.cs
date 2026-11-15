@@ -10,6 +10,8 @@ using Duskland.Modules.Inventory.Contracts.Features.CreateStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock.Dtos;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock.Queries;
+using Duskland.Modules.Inventory.Contracts.Features.ReleaseReservation;
+using Duskland.Modules.Inventory.Contracts.Features.ReleaseReservation.Command;
 using Duskland.Modules.Inventory.Contracts.Features.RemoveStock;
 using Duskland.Modules.Inventory.Contracts.Features.RemoveStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.SetQuantity;
@@ -59,6 +61,14 @@ public static class InventoryEndpoints
 
         group.MapPost("/reservation", CreateReservation)
              .WithName("CreateReservation")
+             .Produces(StatusCodes.Status200OK)
+             .Produces(StatusCodes.Status201Created)
+             .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status404NotFound)
+             .ProducesProblem(StatusCodes.Status409Conflict); 
+
+        group.MapPost("/reservation/{reservationId}/release", ReleaseReservation)
+             .WithName("ReleaseReservation")
              .Produces(StatusCodes.Status200OK)
              .Produces(StatusCodes.Status201Created)
              .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -128,5 +138,13 @@ public static class InventoryEndpoints
         }
 
         return Results.Ok(new { ReservationId = result.Id });
+    }
+
+    private static async Task<IResult> ReleaseReservation(Guid storeId, Guid productId, Guid reservationId, IReleaseReservationHandler handler, CancellationToken cancellationToken)
+    {
+        var command = new ReleaseReservationCommand(storeId, productId, reservationId);
+        await handler.Handle(command, cancellationToken);
+
+        return Results.NoContent();
     }
 }
