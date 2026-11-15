@@ -69,8 +69,7 @@ public static class InventoryEndpoints
 
         group.MapPost("/reservation/{reservationId}/release", ReleaseReservation)
              .WithName("ReleaseReservation")
-             .Produces(StatusCodes.Status200OK)
-             .Produces(StatusCodes.Status201Created)
+             .Produces(StatusCodes.Status204NoContent)
              .ProducesProblem(StatusCodes.Status400BadRequest)
              .ProducesProblem(StatusCodes.Status404NotFound)
              .ProducesProblem(StatusCodes.Status409Conflict); 

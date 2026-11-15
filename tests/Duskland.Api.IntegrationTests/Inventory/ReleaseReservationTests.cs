@@ -39,6 +39,21 @@ public class ReleaseReservationTests : IClassFixture<DusklandWebApplicationFacto
     }
 
     [Fact]
+    public async Task ReleaseReservation_ExpiredButStillActive_ReleasesStock()
+    {
+        var reservation = await SeedAsync(pastExpiration: true);
+        Assert.Equal(ReservationStatus.ACTIVE, reservation.Status);
+        Assert.True(reservation.ExpirationDate < DateTime.UtcNow);
+
+        using var response = await ReleaseAsync(reservation);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        AssertReservationUnchanged(reservation, Assert.Single(await _factory.GetTable<StockReservation>()),
+            ReservationStatus.RELEASED);
+        await AssertStockReleasedAsync(reservation.Stock, reservation.Quantity);
+    }
+
+    [Fact]
     public async Task ReleaseReservation_RepeatedRequest_Returns204WithoutUpdatingStockAgain()
     {
         var reservation = await SeedAsync();
