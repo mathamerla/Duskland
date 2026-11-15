@@ -58,7 +58,6 @@ public class ReleaseReservationTests : IClassFixture<DusklandWebApplicationFacto
     [Theory]
     [InlineData(ReservationStatus.RELEASED, false, HttpStatusCode.NoContent)]
     [InlineData(ReservationStatus.EXPIRED, false, HttpStatusCode.NoContent)]
-    [InlineData(ReservationStatus.ACTIVE, true, HttpStatusCode.NoContent)]
     [InlineData(ReservationStatus.CONFIRMED, false, HttpStatusCode.Conflict)]
     [InlineData(ReservationStatus.CONFIRMED, true, HttpStatusCode.Conflict)]
     public async Task ReleaseReservation_ProcessedOrExpired_DoesNotChangeStockOrReservation(

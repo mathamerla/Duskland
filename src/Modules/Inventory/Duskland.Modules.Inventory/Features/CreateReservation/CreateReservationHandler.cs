@@ -110,7 +110,7 @@ internal class CreateReservationHandler(InventoryDbContext Context) : ICreateRes
             return null;
         }
 
-        if (existingReservation.Quantity == command.Quantity && existingReservation.IsActive())
+        if (existingReservation.Quantity == command.Quantity && existingReservation.IsActiveAndEffective())
         {
             return existingReservation.Id;
         }
