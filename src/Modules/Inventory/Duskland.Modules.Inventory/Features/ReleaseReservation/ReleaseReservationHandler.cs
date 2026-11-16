@@ -10,12 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Duskland.Modules.Inventory.Features.ReleaseReservation;
 
-enum ReleaseTransactionStatus
-{
-    RESERVATION_NOT_UPDATED,
-    STOCK_NOT_UPDATED,
-    SUCCESS
-}
 
 internal class ReleaseReservationHandler(InventoryDbContext Context) : IReleaseReservationHandler
 {
@@ -30,12 +24,12 @@ internal class ReleaseReservationHandler(InventoryDbContext Context) : IReleaseR
 
         var transactionStatus = await RunTransaction(command, reservation.Quantity, cancellationToken);
 
-        if (transactionStatus == ReleaseTransactionStatus.SUCCESS)
+        if (transactionStatus == ReservationTransactionStatus.SUCCESS)
         {
             return;
         }
 
-        if (transactionStatus == ReleaseTransactionStatus.RESERVATION_NOT_UPDATED)
+        if (transactionStatus == ReservationTransactionStatus.RESERVATION_NOT_UPDATED)
         {
             var isProcessed = await ValidateNotUpdateReservationResult(command, cancellationToken); 
 
@@ -45,7 +39,7 @@ internal class ReleaseReservationHandler(InventoryDbContext Context) : IReleaseR
             }
         }
 
-        if (transactionStatus == ReleaseTransactionStatus.STOCK_NOT_UPDATED)
+        if (transactionStatus == ReservationTransactionStatus.STOCK_NOT_UPDATED)
         {
             var isProcessed = await ValidateInvalidStockResult(command, cancellationToken);
 
@@ -69,7 +63,7 @@ internal class ReleaseReservationHandler(InventoryDbContext Context) : IReleaseR
                     ?? throw new NotFoundException($"Reservation with ID {command.ReservationId} does not exist");
     }
 
-    private async Task<ReleaseTransactionStatus> RunTransaction(ReleaseReservationCommand command, int quantity, CancellationToken cancellationToken)
+    private async Task<ReservationTransactionStatus> RunTransaction(ReleaseReservationCommand command, int quantity, CancellationToken cancellationToken)
     {
         using var transaction = await Context.Database.BeginTransactionAsync(cancellationToken);
 
@@ -77,34 +71,35 @@ internal class ReleaseReservationHandler(InventoryDbContext Context) : IReleaseR
 
         if (updatedReservations == 0)
         {
-            return ReleaseTransactionStatus.RESERVATION_NOT_UPDATED;
+            return ReservationTransactionStatus.RESERVATION_NOT_UPDATED;
         }
 
         var updatedStocks = await ReleaseStock(command.StoreId, command.ProductId, quantity, cancellationToken);
 
         if (updatedStocks == 0)
         {
-            return ReleaseTransactionStatus.STOCK_NOT_UPDATED;
+            return ReservationTransactionStatus.STOCK_NOT_UPDATED;
         }
 
         await transaction.CommitAsync(cancellationToken);
 
-        return ReleaseTransactionStatus.SUCCESS;
+        return ReservationTransactionStatus.SUCCESS;
     }
 
     private async Task<bool> ValidateInvalidStockResult(ReleaseReservationCommand command, CancellationToken cancellationToken)
     {
         var reservation = await Reservation(command, cancellationToken);     
+
+        if (IsReservationProcessed(reservation))
+        {
+            return true;
+        }
+
         var stock = await Stock(command.StoreId, command.ProductId, cancellationToken);
 
         if (stock.ReservedQuantity < reservation.Quantity)
         {
             throw new DomainException($"Stock for product {command.ProductId} and store {command.StoreId} does not have enough reservation to process request");
-        }
-
-        if (IsReservationProcessed(reservation))
-        {
-           return true; 
         }
 
         return false;
