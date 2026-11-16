@@ -95,6 +95,7 @@ internal class ConfirmReservationHandler(InventoryDbContext context) : IConfirmR
             .Where(stock => 
                 stock.Quantity - reservation.Quantity >= 0 && 
                 stock.ReservedQuantity - reservation.Quantity >= 0)
+            .Where(stock => stock.Quantity >= stock.ReservedQuantity)
             .ExecuteUpdateAsync(update => update
                 .SetProperty(stock => stock.Quantity, stock => stock.Quantity - reservation.Quantity)
                 .SetProperty(stock => stock.ReservedQuantity, stock => stock.ReservedQuantity - reservation.Quantity)
@@ -110,7 +111,7 @@ internal class ConfirmReservationHandler(InventoryDbContext context) : IConfirmR
                 r.ProductId == command.ProductId)
             .Where(r => 
                 r.Status == ReservationStatus.ACTIVE && 
-                r.ExpirationDate > DateTime.UtcNow)
+                r.ExpirationDate > InventoryDbContext.ClockTimestamp())
             .ExecuteUpdateAsync(update => update.SetProperty(r => r.Status, ReservationStatus.CONFIRMED), cancellationToken);
     }
 
