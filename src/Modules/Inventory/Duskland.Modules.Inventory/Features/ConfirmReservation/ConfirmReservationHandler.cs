@@ -53,7 +53,7 @@ internal class ConfirmReservationHandler(InventoryDbContext context) : IConfirmR
                     stock.ProductId == command.ProductId, cancellationToken)
                 ?? throw new NotFoundException($"Stock for store {command.StoreId} and product {command.ProductId} does not exist");
 
-            if (stock.Quantity < reservation.Quantity || stock.ReservedQuantity < reservation.Quantity)
+            if (stock.Quantity < reservation.Quantity || stock.ReservedQuantity < reservation.Quantity || stock.Quantity < stock.ReservedQuantity)
             {
                 throw new DomainException($"Stock for product {command.ProductId} and store {command.StoreId} does not have enough quantity or reservation to process request");
             }

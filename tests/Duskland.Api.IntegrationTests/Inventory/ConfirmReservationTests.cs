@@ -95,6 +95,7 @@ public class ConfirmReservationTests : IClassFixture<DusklandWebApplicationFacto
     [Theory]
     [InlineData(10, 2)]
     [InlineData(2, 3)]
+    [InlineData(8, 10)]
     public async Task ConfirmReservation_InconsistentStock_Returns400AndRollsBackReservation(int quantity, int reserved)
     {
         var reservation = await SeedAsync();
