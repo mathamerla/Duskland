@@ -16,6 +16,10 @@ internal class InventoryDbContext: DbContext
     public DbSet<Stock> Stocks { get; set; }
     public DbSet<StockReservation> StockReservations { get; internal set; }
 
+    [DbFunction("clock_timestamp", IsBuiltIn = true)]
+    public static DateTime ClockTimestamp()
+        => throw new InvalidOperationException("This method can only be used in database queries.");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(SCHEMA);

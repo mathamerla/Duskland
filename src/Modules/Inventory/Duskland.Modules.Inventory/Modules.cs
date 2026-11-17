@@ -16,6 +16,8 @@ using Duskland.Modules.Inventory.Contracts.Features.CreateReservation;
 using Duskland.Modules.Inventory.Features.CreateReservation;
 using Duskland.Modules.Inventory.Contracts.Features.ReleaseReservation;
 using Duskland.Modules.Inventory.Features.ReleaseReservation;
+using Duskland.Modules.Inventory.Contracts.Features.ConfirmReservation;
+using Duskland.Modules.Inventory.Features.ConfirmReservation;
 
 namespace Duskland.Modules.Inventory;
 
@@ -36,6 +38,7 @@ public static class InventoryModules
         services.AddScoped<ISetQuantityHandler, SetQuantityHandler>();
         services.AddScoped<ICreateReservationHandler, CreateReservationHandler>();
         services.AddScoped<IReleaseReservationHandler, ReleaseReservationHandler>();
+        services.AddScoped<IConfirmReservationHandler, ConfirmReservationHandler>();
 
         return services;
     }

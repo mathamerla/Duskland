@@ -5,6 +5,8 @@ using Duskland.Modules.Inventory.Contracts.Features.AddStock;
 using Duskland.Modules.Inventory.Contracts.Features.AddStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.CreateReservation;
 using Duskland.Modules.Inventory.Contracts.Features.CreateReservation.Command;
+using Duskland.Modules.Inventory.Contracts.Features.ConfirmReservation;
+using Duskland.Modules.Inventory.Contracts.Features.ConfirmReservation.Command;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock;
 using Duskland.Modules.Inventory.Contracts.Features.CreateStock.Command;
 using Duskland.Modules.Inventory.Contracts.Features.GetStock;
@@ -74,6 +76,13 @@ public static class InventoryEndpoints
              .ProducesProblem(StatusCodes.Status404NotFound)
              .ProducesProblem(StatusCodes.Status409Conflict); 
 
+        group.MapPost("/reservation/{reservationId}/confirm", ConfirmReservation)
+             .WithName("ConfirmReservation")
+             .Produces(StatusCodes.Status204NoContent)
+             .ProducesProblem(StatusCodes.Status400BadRequest)
+             .ProducesProblem(StatusCodes.Status404NotFound)
+             .ProducesProblem(StatusCodes.Status409Conflict);
+
         return app;
     }
 
@@ -137,6 +146,14 @@ public static class InventoryEndpoints
         }
 
         return Results.Ok(new { ReservationId = result.Id });
+    }
+
+    private static async Task<IResult> ConfirmReservation(Guid storeId, Guid productId, Guid reservationId, IConfirmReservationHandler handler, CancellationToken cancellationToken)
+    {
+        var command = new ConfirmReservationCommand(storeId, productId, reservationId);
+        await handler.Handle(command, cancellationToken);
+
+        return Results.NoContent();
     }
 
     private static async Task<IResult> ReleaseReservation(Guid storeId, Guid productId, Guid reservationId, IReleaseReservationHandler handler, CancellationToken cancellationToken)
